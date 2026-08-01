@@ -1,0 +1,48 @@
+{
+  "cottages": {
+    "hotelId": "52159",
+    "name": "Жилые домики (Коттеджи)",
+    "monthly": {
+      "2025-07": { "revenue": 6399951.00, "soldNights": 486, "guests": 804, "roomArrivals": 225, "adr": 13168.62, "revPar": 9830.95, "totalRooms": 651, "occupancy": 74.65 },
+      "2025-08": { "revenue": 4953152.00, "soldNights": 368, "guests": 555, "roomArrivals": 156, "adr": 13459.65, "revPar": 7209.83, "totalRooms": 687, "occupancy": 53.57 },
+      "2025-09": { "revenue": 990971.42, "soldNights": 87, "guests": 126, "roomArrivals": 46, "adr": 11390.48, "revPar": 1472.47, "totalRooms": 673, "occupancy": 12.93 },
+      "2025-10": { "revenue": 779178.58, "soldNights": 104, "guests": 137, "roomArrivals": 53, "adr": 7492.10, "revPar": 1254.72, "totalRooms": 621, "occupancy": 16.75 },
+      "2025-11": { "revenue": 637770.00, "soldNights": 86, "guests": 130, "roomArrivals": 43, "adr": 7415.93, "revPar": 1174.53, "totalRooms": 543, "occupancy": 15.84 },
+      "2025-12": { "revenue": 664730.00, "soldNights": 68, "guests": 110, "roomArrivals": 30, "adr": 9775.44, "revPar": 1270.99, "totalRooms": 523, "occupancy": 13.00 },
+      "2026-01": { "revenue": 1194960.00, "soldNights": 101, "guests": 101, "roomArrivals": 38, "adr": 11831.29, "revPar": 2580.91, "totalRooms": 463, "occupancy": 21.81 },
+      "2026-02": { "revenue": 479427.20, "soldNights": 69, "guests": 80, "roomArrivals": 27, "adr": 6948.22, "revPar": 1278.47, "totalRooms": 375, "occupancy": 18.40 },
+      "2026-03": { "revenue": 503565.86, "soldNights": 79, "guests": 107, "roomArrivals": 38, "adr": 6374.25, "revPar": 1149.69, "totalRooms": 438, "occupancy": 18.04 },
+      "2026-04": { "revenue": 384200.00, "soldNights": 62, "guests": 75, "roomArrivals": 29, "adr": 6196.77, "revPar": 808.84, "totalRooms": 475, "occupancy": 13.05 },
+      "2026-05": { "revenue": 1609200.00, "soldNights": 126, "guests": 194, "roomArrivals": 65, "adr": 12771.43, "revPar": 2445.59, "totalRooms": 658, "occupancy": 19.15 },
+      "2026-06": { "revenue": 3775477.46, "soldNights": 266, "guests": 452, "roomArrivals": 137, "adr": 14193.52, "revPar": 5576.78, "totalRooms": 677, "occupancy": 39.29 },
+      "2026-07": { "revenue": 8018663.00, "soldNights": 512, "guests": 789, "roomArrivals": 247, "adr": 15661.45, "revPar": 11373.99, "totalRooms": 705, "occupancy": 72.62 }
+    },
+    "totalPeriod": {
+      "revenue": 30391246.52, "soldNights": 2414, "guests": 3660, "roomArrivals": 1134, "adr": 12589.58, "revPar": 4058.12, "totalRooms": 7489, "occupancy": 32.23
+    },
+    "extraServices": 739780.00
+  },
+  "beach": {
+    "hotelId": "54511",
+    "name": "Пляжные объекты & Бани",
+    "monthly": {
+      "2025-07": { "revenue": 5024987.00, "soldNights": 728, "guests": 6356, "roomArrivals": 728, "adr": 6902.45, "revPar": 2705.97, "totalRooms": 1857, "occupancy": 39.20 },
+      "2025-08": { "revenue": 3854200.00, "soldNights": 379, "guests": 3951, "roomArrivals": 373, "adr": 10169.39, "revPar": 2181.21, "totalRooms": 1767, "occupancy": 21.45 },
+      "2025-09": { "revenue": 1090600.00, "soldNights": 125, "guests": 819, "roomArrivals": 106, "adr": 8724.80, "revPar": 634.44, "totalRooms": 1719, "occupancy": 7.27 },
+      "2025-10": { "revenue": 332800.00, "soldNights": 68, "guests": 33, "roomArrivals": 33, "adr": 4894.12, "revPar": 185.09, "totalRooms": 1798, "occupancy": 3.78 },
+      "2025-11": { "revenue": 252400.00, "soldNights": 56, "guests": 27, "roomArrivals": 27, "adr": 4507.14, "revPar": 145.31, "totalRooms": 1737, "occupancy": 3.22 },
+      "2025-12": { "revenue": 156750.00, "soldNights": 49, "guests": 15, "roomArrivals": 15, "adr": 3198.98, "revPar": 87.18, "totalRooms": 1798, "occupancy": 2.73 },
+      "2026-01": { "revenue": 372230.00, "soldNights": 65, "guests": 29, "roomArrivals": 29, "adr": 5726.62, "revPar": 207.02, "totalRooms": 1798, "occupancy": 3.62 },
+      "2026-02": { "revenue": 127410.00, "soldNights": 49, "guests": 13, "roomArrivals": 13, "adr": 2600.20, "revPar": 78.45, "totalRooms": 1624, "occupancy": 3.02 },
+      "2026-03": { "revenue": 226340.00, "soldNights": 63, "guests": 30, "roomArrivals": 30, "adr": 3592.70, "revPar": 167.04, "totalRooms": 1355, "occupancy": 4.65 },
+      "2026-04": { "revenue": 440030.00, "soldNights": 72, "guests": 55, "roomArrivals": 55, "adr": 6111.53, "revPar": 428.04, "totalRooms": 1028, "occupancy": 7.00 },
+      "2026-05": { "revenue": 3328877.02, "soldNights": 285, "guests": 301, "roomArrivals": 301, "adr": 11680.27, "revPar": 1846.30, "totalRooms": 1803, "occupancy": 15.81 },
+      "2026-06": { "revenue": 3340380.00, "soldNights": 347, "guests": 347, "roomArrivals": 347, "adr": 9626.46, "revPar": 1923.07, "totalRooms": 1737, "occupancy": 19.98 },
+      "2026-07": { "revenue": 4579730.00, "soldNights": 428, "guests": 468, "roomArrivals": 468, "adr": 10700.30, "revPar": 2530.24, "totalRooms": 1810, "occupancy": 23.65 }
+    },
+    "totalPeriod": {
+      "revenue": 23126734.02, "soldNights": 2714, "guests": 12444, "roomArrivals": 2525, "adr": 8521.27, "revPar": 1059.35, "totalRooms": 21831, "occupancy": 12.43
+    },
+    "extraServices": 2235840.00
+  }
+}
