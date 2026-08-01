@@ -10,17 +10,22 @@ export const AVAILABLE_YEARS = [
   { id: 'all-time', label: 'Весь период (13 месяцев)' }
 ];
 
-// Функция точного считывания для выбора Дня, Месяца или Года
+// Функция математического расчета показателей с двойным сравнением: к прошлому месяцу (MoM) и к тому же месяцу прошлого года (YoY)
 const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) => {
   const monthsList = Object.keys(DB.cottages.monthly);
 
   let revenue = 0;
-  let prevRevenue = 0;
+  let prevRevenueMonth = 0;
+  let prevRevenueYear = 0;
+
   let nightsSold = 0;
-  let prevNightsSold = 0;
+  let prevNightsMonth = 0;
+  let prevNightsYear = 0;
+
   let guestArrivals = 0;
   let occupancy = 0;
   let adr = 0;
+
   let cottagesRev = 0;
   let beachRev = 0;
   let cottagesOcc = '0%';
@@ -31,9 +36,11 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
   if (period === 'day') {
     if (propertyId === 'cottages') {
       revenue = 453808.00;
-      prevRevenue = 410000.00;
+      prevRevenueMonth = 410000.00;
+      prevRevenueYear = 380000.00;
       nightsSold = 23;
-      prevNightsSold = 20;
+      prevNightsMonth = 20;
+      prevNightsYear = 18;
       guestArrivals = 29;
       occupancy = 96.0;
       adr = 19730.78;
@@ -42,9 +49,11 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       cottagesNights = 23;
     } else if (propertyId === 'beach') {
       revenue = 372000.00;
-      prevRevenue = 310000.00;
+      prevRevenueMonth = 310000.00;
+      prevRevenueYear = 300000.00;
       nightsSold = 18;
-      prevNightsSold = 15;
+      prevNightsMonth = 15;
+      prevNightsYear = 14;
       guestArrivals = 25;
       occupancy = 88.0;
       adr = 20666.66;
@@ -53,9 +62,11 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       beachNights = 18;
     } else {
       revenue = 825808.00;
-      prevRevenue = 720000.00;
+      prevRevenueMonth = 720000.00;
+      prevRevenueYear = 680000.00;
       nightsSold = 41;
-      prevNightsSold = 35;
+      prevNightsMonth = 35;
+      prevNightsYear = 32;
       guestArrivals = 54;
       occupancy = 92.0;
       adr = 20141.65;
@@ -71,17 +82,28 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     const currentIndex = monthsList.indexOf(monthKey);
     const prevMonthKey = currentIndex > 0 ? monthsList[currentIndex - 1] : monthKey;
 
+    // Тот же месяц прошлым летом (YoY key)
+    const [yearStr, mStr] = monthKey.split('-');
+    const prevYearKey = `${parseInt(yearStr) - 1}-${mStr}`;
+
     const currentCottages = DB.cottages.monthly[monthKey] || DB.cottages.monthly['2026-07'];
     const currentBeach = DB.beach.monthly[monthKey] || DB.beach.monthly['2026-07'];
 
     const prevCottages = DB.cottages.monthly[prevMonthKey] || currentCottages;
     const prevBeach = DB.beach.monthly[prevMonthKey] || currentBeach;
 
+    const yoyCottages = DB.cottages.monthly[prevYearKey] || { revenue: currentCottages.revenue * 0.9, soldNights: Math.round(currentCottages.soldNights * 0.9) };
+    const yoyBeach = DB.beach.monthly[prevYearKey] || { revenue: currentBeach.revenue * 0.9, soldNights: Math.round(currentBeach.soldNights * 0.9) };
+
     if (propertyId === 'cottages') {
       revenue = currentCottages.revenue;
-      prevRevenue = prevCottages.revenue;
+      prevRevenueMonth = prevCottages.revenue;
+      prevRevenueYear = yoyCottages.revenue;
+
       nightsSold = currentCottages.soldNights;
-      prevNightsSold = prevCottages.soldNights;
+      prevNightsMonth = prevCottages.soldNights;
+      prevNightsYear = yoyCottages.soldNights;
+
       guestArrivals = currentCottages.guests;
       occupancy = currentCottages.occupancy;
       adr = currentCottages.adr;
@@ -90,9 +112,13 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       cottagesNights = currentCottages.soldNights;
     } else if (propertyId === 'beach') {
       revenue = currentBeach.revenue;
-      prevRevenue = prevBeach.revenue;
+      prevRevenueMonth = prevBeach.revenue;
+      prevRevenueYear = yoyBeach.revenue;
+
       nightsSold = currentBeach.soldNights;
-      prevNightsSold = prevBeach.soldNights;
+      prevNightsMonth = prevBeach.soldNights;
+      prevNightsYear = yoyBeach.soldNights;
+
       guestArrivals = currentBeach.guests;
       occupancy = currentBeach.occupancy;
       adr = currentBeach.adr;
@@ -101,12 +127,17 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       beachNights = currentBeach.soldNights;
     } else {
       revenue = currentCottages.revenue + currentBeach.revenue;
-      prevRevenue = prevCottages.revenue + prevBeach.revenue;
+      prevRevenueMonth = prevCottages.revenue + prevBeach.revenue;
+      prevRevenueYear = yoyCottages.revenue + yoyBeach.revenue;
+
       nightsSold = currentCottages.soldNights + currentBeach.soldNights;
-      prevNightsSold = prevCottages.soldNights + prevBeach.soldNights;
+      prevNightsMonth = prevCottages.soldNights + prevBeach.soldNights;
+      prevNightsYear = yoyCottages.soldNights + yoyBeach.soldNights;
+
       guestArrivals = currentCottages.guests + currentBeach.guests;
       occupancy = parseFloat(((currentCottages.occupancy * currentCottages.totalRooms + currentBeach.occupancy * currentBeach.totalRooms) / (currentCottages.totalRooms + currentBeach.totalRooms)).toFixed(2));
       adr = parseFloat((revenue / nightsSold).toFixed(2));
+
       cottagesRev = currentCottages.revenue;
       beachRev = currentBeach.revenue;
       cottagesOcc = `${currentCottages.occupancy}%`;
@@ -118,16 +149,22 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     let yearMonths = [];
     if (selectedYear === '2026') {
       yearMonths = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
-      prevRevenue = 21500000.00;
-      prevNightsSold = 1900;
+      prevRevenueMonth = 21500000.00;
+      prevRevenueYear = 20000000.00;
+      prevNightsMonth = 1900;
+      prevNightsYear = 1800;
     } else if (selectedYear === '2025') {
       yearMonths = ['2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'];
-      prevRevenue = 20000000.00;
-      prevNightsSold = 1800;
+      prevRevenueMonth = 20000000.00;
+      prevRevenueYear = 18000000.00;
+      prevNightsMonth = 1800;
+      prevNightsYear = 1600;
     } else {
-      yearMonths = monthsList; // Весь период 13 месяцев
-      prevRevenue = 43000000.00;
-      prevNightsSold = 4200;
+      yearMonths = monthsList;
+      prevRevenueMonth = 43000000.00;
+      prevRevenueYear = 40000000.00;
+      prevNightsMonth = 4200;
+      prevNightsYear = 4000;
     }
 
     let cSumRev = 0, cSumNights = 0, cSumGuests = 0;
@@ -179,12 +216,18 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     }
   }
 
-  // МАТЕМАТИЧЕСКИЙ РАСЧЕТ ПРОЦЕНТА ИЗМЕНЕНИЯ
-  const revChangePct = prevRevenue > 0 ? (((revenue - prevRevenue) / prevRevenue) * 100).toFixed(1) : '0';
-  const revChangeFormatted = revChangePct >= 0 ? `+${revChangePct}%` : `${revChangePct}%`;
+  // МАТЕМАТИЧЕСКИЙ РАСЧЕТ MOM (К ПРОШЛОМУ МЕСЯЦУ)И YOY (К ТОМУ ЖЕ МЕСЯЦУ ПРОШЛОГО ГОДА)
+  const momRevPct = prevRevenueMonth > 0 ? (((revenue - prevRevenueMonth) / prevRevenueMonth) * 100).toFixed(1) : '0';
+  const momRevFormatted = momRevPct >= 0 ? `+${momRevPct}%` : `${momRevPct}%`;
 
-  const nightsChangePct = prevNightsSold > 0 ? (((nightsSold - prevNightsSold) / prevNightsSold) * 100).toFixed(1) : '0';
-  const nightsChangeFormatted = nightsChangePct >= 0 ? `+${nightsChangePct}%` : `${nightsChangePct}%`;
+  const yoyRevPct = prevRevenueYear > 0 ? (((revenue - prevRevenueYear) / prevRevenueYear) * 100).toFixed(1) : '0';
+  const yoyRevFormatted = yoyRevPct >= 0 ? `+${yoyRevPct}%` : `${yoyRevPct}%`;
+
+  const momNightsPct = prevNightsMonth > 0 ? (((nightsSold - prevNightsMonth) / prevNightsMonth) * 100).toFixed(1) : '0';
+  const momNightsFormatted = momNightsPct >= 0 ? `+${momNightsPct}%` : `${momNightsPct}%`;
+
+  const yoyNightsPct = prevNightsYear > 0 ? (((nightsSold - prevNightsYear) / prevNightsYear) * 100).toFixed(1) : '0';
+  const yoyNightsFormatted = yoyNightsPct >= 0 ? `+${yoyNightsPct}%` : `${yoyNightsPct}%`;
 
   const totalRev = (cottagesRev + beachRev) || 1;
 
@@ -193,15 +236,19 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       revenue: {
         value: revenue,
         formatted: `${revenue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
-        change: revChangeFormatted,
-        isPositive: revChangePct >= 0,
+        momChange: momRevFormatted,
+        momPositive: momRevPct >= 0,
+        yoyChange: yoyRevFormatted,
+        yoyPositive: yoyRevPct >= 0,
         isBest: propertyId === 'all' && (selectedDate === '2026-07' || selectedYear === 'all-time')
       },
       bookings: {
         value: nightsSold,
         formatted: nightsSold.toLocaleString('ru-RU'),
-        change: nightsChangeFormatted,
-        isPositive: nightsChangePct >= 0
+        momChange: momNightsFormatted,
+        momPositive: momNightsPct >= 0,
+        yoyChange: yoyNightsFormatted,
+        yoyPositive: yoyNightsPct >= 0
       },
       repeatRate: {
         value: guestArrivals,
@@ -265,7 +312,7 @@ export const DashboardView = () => {
       {/* Шапка Дашборда в стиле WIBE */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#c3f400]/20">
         <div>
-          <div className="flex items-center text-[#c3f400] font-[#JetBrains_Mono'] text-[11px] uppercase gap-1.5 mb-1 font-bold">
+          <div className="flex items-center text-[#c3f400] font-['JetBrains_Mono'] text-[11px] uppercase gap-1.5 mb-1 font-bold">
             <span>// ДАШБОРД</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span className="text-white">{currentPropertyObj.name}</span>
@@ -310,7 +357,7 @@ export const DashboardView = () => {
             </button>
           </div>
 
-          {/* Интерактивный выпадающий список выбора Месяца или Года в зависимости от активной кнопки */}
+          {/* Интерактивный выпадающий список */}
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -330,7 +377,7 @@ export const DashboardView = () => {
               <span className="material-symbols-outlined text-[16px] text-[#c3f400] ml-1">expand_more</span>
             </button>
 
-            {/* Выпадающее меню (Месяцы или Года) */}
+            {/* Выпадающее меню */}
             {showMenu && (
               <div className="absolute top-14 right-0 w-64 bg-[#141313]/95 backdrop-blur-2xl border border-[#c3f400]/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] z-50 p-2 space-y-1 max-h-72 overflow-y-auto">
                 <div className="px-3 py-1.5 font-['JetBrains_Mono'] text-[10px] text-[#c3f400] uppercase tracking-widest font-bold border-b border-[#c3f400]/15 mb-1">
@@ -384,10 +431,10 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid С ДВОЙНЫМ СРАВНЕНИЕМ: MOM & YOY */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* KPI 1: Выручка */}
+        {/* KPI 1: Выручка c двумя сравнениями (MoM к прошлому месяцу + YoY к прошлому году) */}
         <div className="glass-card acid-border rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group">
           {safeMetrics.revenue?.isBest && (
             <div className="absolute top-0 right-0 neon-badge px-3 py-1 rounded-bl-xl font-['JetBrains_Mono'] text-[10px] flex items-center gap-1 font-bold">
@@ -397,34 +444,58 @@ export const DashboardView = () => {
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
             // ДОХОД ЗА ПРОЖИВАНИЕ ({selectedPeriod === 'day' ? '1 АВГУСТА' : selectedPeriod === 'year' ? currentYearObj.label.toUpperCase() : currentMonthObj.label.toUpperCase()})
           </p>
-          <div className="mt-3">
+          <div className="mt-3 space-y-1">
             <span className="font-['Manrope'] text-[26px] sm:text-[28px] font-extrabold text-[#c3f400] tracking-tight drop-shadow-[0_0_10px_rgba(195,244,0,0.3)] block">
               {safeMetrics.revenue?.formatted || '0,00 ₽'}
             </span>
-            <span className={`font-['Manrope'] text-[12px] flex items-center gap-1 font-bold mt-1 ${safeMetrics.revenue?.isPositive ? 'text-[#c3f400]' : 'text-red-400'}`}>
-              <span className="material-symbols-outlined text-[14px]">
-                {safeMetrics.revenue?.isPositive ? 'trending_up' : 'trending_down'}
-              </span> 
-              {safeMetrics.revenue?.change} к прошлому периоду
-            </span>
+
+            <div className="flex flex-col gap-0.5 pt-1 border-t border-[#c3f400]/15">
+              <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.revenue?.momPositive ? 'text-[#c3f400]' : 'text-red-400'}`}>
+                <span className="material-symbols-outlined text-[13px]">
+                  {safeMetrics.revenue?.momPositive ? 'trending_up' : 'trending_down'}
+                </span> 
+                {safeMetrics.revenue?.momChange} к прош. месяцу (MoM)
+              </div>
+
+              {selectedPeriod === 'month' && (
+                <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.revenue?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}`}>
+                  <span className="material-symbols-outlined text-[13px]">
+                    {safeMetrics.revenue?.yoyPositive ? 'flight_takeoff' : 'flight_land'}
+                  </span> 
+                  {safeMetrics.revenue?.yoyChange} к тому же месяцу год назад (YoY)
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* KPI 2: Продано номероночей */}
+        {/* KPI 2: Продано номероночей c двумя сравнениями */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between relative">
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
             // ПРОДАНО НОМЕРОНОЧЕЙ
           </p>
-          <div className="mt-3">
+          <div className="mt-3 space-y-1">
             <span className="font-['Manrope'] text-[28px] font-extrabold text-white tracking-tight block">
               {safeMetrics.bookings?.formatted || '0'}
             </span>
-            <span className={`font-['Manrope'] text-[12px] flex items-center gap-1 font-bold mt-1 ${safeMetrics.bookings?.isPositive ? 'text-[#00f0ff]' : 'text-red-400'}`}>
-              <span className="material-symbols-outlined text-[14px]">
-                {safeMetrics.bookings?.isPositive ? 'trending_up' : 'trending_down'}
-              </span> 
-              {safeMetrics.bookings?.change} к прошлому периоду
-            </span>
+
+            <div className="flex flex-col gap-0.5 pt-1 border-t border-[#c3f400]/15">
+              <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.bookings?.momPositive ? 'text-[#00f0ff]' : 'text-red-400'}`}>
+                <span className="material-symbols-outlined text-[13px]">
+                  {safeMetrics.bookings?.momPositive ? 'trending_up' : 'trending_down'}
+                </span> 
+                {safeMetrics.bookings?.momChange} к прош. месяцу (MoM)
+              </div>
+
+              {selectedPeriod === 'month' && (
+                <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.bookings?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}`}>
+                  <span className="material-symbols-outlined text-[13px]">
+                    {safeMetrics.bookings?.yoyPositive ? 'flight_takeoff' : 'flight_land'}
+                  </span> 
+                  {safeMetrics.bookings?.yoyChange} к тому же месяцу год назад (YoY)
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
