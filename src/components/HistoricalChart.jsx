@@ -27,13 +27,12 @@ ChartJS.register(
 
 export const HistoricalChart = () => {
   const { selectedProperty, selectedPeriod } = useApp();
-  const [metric, setMetric] = useState('revenue');
   const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
-    const data = fetchTLHistoricalData(selectedProperty, metric, selectedPeriod);
+    const data = fetchTLHistoricalData(selectedProperty, 'revenue', selectedPeriod);
     setChartData(data);
-  }, [selectedProperty, metric, selectedPeriod]);
+  }, [selectedProperty, selectedPeriod]);
 
   if (!chartData) return null;
 
@@ -56,13 +55,7 @@ export const HistoricalChart = () => {
             let label = context.dataset.label || '';
             if (label) label += ': ';
             if (context.parsed.y !== null) {
-              if (metric === 'revenue') {
-                label += context.parsed.y + ' млн ₽';
-              } else if (metric === 'bookings') {
-                label += context.parsed.y + ' ночей';
-              } else {
-                label += context.parsed.y + '%';
-              }
+              label += context.parsed.y + ' млн ₽';
             }
             return label;
           }
@@ -79,20 +72,10 @@ export const HistoricalChart = () => {
         ticks: {
           color: '#a3a6a6',
           font: { family: 'JetBrains Mono', size: 10 },
-          callback: (value) => {
-            if (metric === 'revenue') return value + 'M ₽';
-            if (metric === 'bookings') return value;
-            return value + '%';
-          }
+          callback: (value) => value + 'M ₽'
         }
       }
     }
-  };
-
-  const getMetricTitle = () => {
-    if (metric === 'revenue') return 'ВЫРУЧКА';
-    if (metric === 'bookings') return 'ПРОДАНО НОЧЕЙ';
-    return '% ЗАГРУЗКИ ФОНДА';
   };
 
   return (
@@ -101,45 +84,11 @@ export const HistoricalChart = () => {
         <div>
           <h3 className="font-['Syne'] font-extrabold text-[17px] text-white uppercase flex items-center gap-2 tracking-wide">
             <span className="w-2.5 h-2.5 rounded-full bg-[#c3f400] animate-pulse"></span>
-            СРАВНЕНИЕ С ИСТОРИЕЙ ({getMetricTitle()})
+            СРАВНЕНИЕ С ИСТОРИЕЙ (ВЫРУЧКА В МЛН ₽)
           </h3>
           <p className="font-['JetBrains_Mono'] text-[10px] text-[#a3a6a6] uppercase mt-0.5">
             // ОФИЦИАЛЬНАЯ ПОМЕСЯЧНАЯ ДИНАМИКА TRAVELLINE (2025–2026)
           </p>
-        </div>
-
-        {/* Интерактивные кнопки переключения метрик Выручка / Брони / Загрузка */}
-        <div className="flex bg-[#141313] p-1 rounded-xl border border-[#c3f400]/20 font-['JetBrains_Mono'] text-[11px]">
-          <button
-            onClick={() => setMetric('revenue')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              metric === 'revenue'
-                ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
-                : 'text-[#a3a6a6] hover:text-white'
-            }`}
-          >
-            Выручка
-          </button>
-          <button
-            onClick={() => setMetric('bookings')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              metric === 'bookings'
-                ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
-                : 'text-[#a3a6a6] hover:text-white'
-            }`}
-          >
-            Брони
-          </button>
-          <button
-            onClick={() => setMetric('occupancy')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              metric === 'occupancy'
-                ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
-                : 'text-[#a3a6a6] hover:text-white'
-            }`}
-          >
-            Загрузка
-          </button>
         </div>
       </div>
 
