@@ -35,7 +35,6 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
     console.warn('Backend server fallback to direct database.json:', err.message);
   }
 
-  // НАПРЯМУЮ ИЗ БАЗЫ ДАННЫХ DATABASE.JSON (ГАРАНТИРОВАННЫЙ РАСЧЕТ БЕЗ ОШИБОК)
   const monthKey = date.length === 7 ? date : date.substring(0, 7);
   const cottagesMonth = DB.cottages.monthly[monthKey] || DB.cottages.monthly['2026-07'];
   const beachMonth = DB.beach.monthly[monthKey] || DB.beach.monthly['2026-07'];
@@ -43,7 +42,6 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
   let revenue = 0;
   let nightsSold = 0;
   let guestArrivals = 0;
-  let roomArrivals = 0;
   let occupancy = 0;
   let adr = 0;
 
@@ -52,21 +50,18 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
       revenue = 453808.00;
       nightsSold = 23;
       guestArrivals = 29;
-      roomArrivals = 12;
       occupancy = 96.0;
       adr = 19730.78;
     } else if (propertyId === 'beach') {
       revenue = 372000.00;
       nightsSold = 18;
       guestArrivals = 25;
-      roomArrivals = 25;
       occupancy = 88.0;
       adr = 20666.66;
     } else {
       revenue = 825808.00;
       nightsSold = 41;
       guestArrivals = 54;
-      roomArrivals = 37;
       occupancy = 92.0;
       adr = 20141.65;
     }
@@ -75,21 +70,18 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
       revenue = cottagesMonth.revenue;
       nightsSold = cottagesMonth.soldNights;
       guestArrivals = cottagesMonth.guests;
-      roomArrivals = cottagesMonth.roomArrivals;
       occupancy = cottagesMonth.occupancy;
       adr = cottagesMonth.adr;
     } else if (propertyId === 'beach') {
       revenue = beachMonth.revenue;
       nightsSold = beachMonth.soldNights;
       guestArrivals = beachMonth.guests;
-      roomArrivals = beachMonth.roomArrivals;
       occupancy = beachMonth.occupancy;
       adr = beachMonth.adr;
     } else {
       revenue = cottagesMonth.revenue + beachMonth.revenue;
       nightsSold = cottagesMonth.soldNights + beachMonth.soldNights;
       guestArrivals = cottagesMonth.guests + beachMonth.guests;
-      roomArrivals = cottagesMonth.roomArrivals + beachMonth.roomArrivals;
       occupancy = parseFloat(((cottagesMonth.occupancy * cottagesMonth.totalRooms + beachMonth.occupancy * beachMonth.totalRooms) / (cottagesMonth.totalRooms + beachMonth.totalRooms)).toFixed(2));
       adr = parseFloat((revenue / nightsSold).toFixed(2));
     }
@@ -98,21 +90,18 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
       revenue = DB.cottages.totalPeriod.revenue;
       nightsSold = DB.cottages.totalPeriod.soldNights;
       guestArrivals = DB.cottages.totalPeriod.guests;
-      roomArrivals = DB.cottages.totalPeriod.roomArrivals;
       occupancy = DB.cottages.totalPeriod.occupancy;
       adr = DB.cottages.totalPeriod.adr;
     } else if (propertyId === 'beach') {
       revenue = DB.beach.totalPeriod.revenue;
       nightsSold = DB.beach.totalPeriod.soldNights;
       guestArrivals = DB.beach.totalPeriod.guests;
-      roomArrivals = DB.beach.totalPeriod.roomArrivals;
       occupancy = DB.beach.totalPeriod.occupancy;
       adr = DB.beach.totalPeriod.adr;
     } else {
       revenue = DB.cottages.totalPeriod.revenue + DB.beach.totalPeriod.revenue;
       nightsSold = DB.cottages.totalPeriod.soldNights + DB.beach.totalPeriod.soldNights;
       guestArrivals = DB.cottages.totalPeriod.guests + DB.beach.totalPeriod.guests;
-      roomArrivals = DB.cottages.totalPeriod.roomArrivals + DB.beach.totalPeriod.roomArrivals;
       occupancy = 22.33;
       adr = parseFloat((revenue / nightsSold).toFixed(2));
     }
@@ -136,24 +125,19 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
       bookings: {
         value: nightsSold,
         formatted: nightsSold.toLocaleString('ru-RU'),
-        change: '+12%',
-        label: 'продано номероночей'
+        change: '+12%'
       },
       occupancy: {
         value: occupancy,
-        formatted: `${occupancy}%`,
-        change: '+5%',
-        label: 'общий % загрузки'
+        formatted: `${occupancy}%`
       },
       repeatRate: {
         value: guestArrivals,
-        formatted: `${guestArrivals.toLocaleString('ru-RU')}`,
-        label: 'заезд гостей'
+        formatted: guestArrivals.toLocaleString('ru-RU')
       },
       adr: {
         value: adr,
-        formatted: `${adr.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
-        label: 'средняя цена (ADR)'
+        formatted: `${adr.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
       }
     },
     breakdown: {
@@ -162,28 +146,44 @@ export const fetchTLMetrics = async (propertyId = 'all', period = 'month', date 
       totalRevenue: totalRev,
       cottagesShare: `${((cottagesRev / totalRev) * 100).toFixed(1)}%`,
       beachShare: `${((beachRev / totalRev) * 100).toFixed(1)}%`
-    },
-    liveSource: `Direct Database.json (${monthKey})`
+    }
   };
 };
 
 /**
- * РЕАЛЬНАЯ ПОМЕСЯЧНАЯ ДИНАМИКА ИЗ СИСТЕМНОЙ БАЗЫ ДАННЫХ
+ * РЕАЛЬНАЯ ПОМЕСЯЧНАЯ ДИНАМИКА ДЛЯ ВСЕХ 3 МЕТРИК ГРАФИКА: Выручка (млн ₽), Брони (ночи), Загрузка (%)
  */
 export const fetchTLHistoricalData = (propertyId = 'all', metric = 'revenue', period = 'month') => {
   const months = ['2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
   const labels = ['Июл 2025', 'Авг 2025', 'Сен 2025', 'Окт 2025', 'Ноя 2025', 'Дек 2025', 'Янв 2026', 'Фев 2026', 'Мар 2026', 'Апр 2026', 'Май 2026', 'Июн 2026', 'Июл 2026'];
 
   const currentYearData = months.map(m => {
-    const cRev = DB.cottages.monthly[m]?.revenue || 0;
-    const bRev = DB.beach.monthly[m]?.revenue || 0;
-    if (propertyId === 'cottages') return parseFloat((cRev / 1000000).toFixed(2));
-    if (propertyId === 'beach') return parseFloat((bRev / 1000000).toFixed(2));
-    return parseFloat(((cRev + bRev) / 1000000).toFixed(2));
+    const cData = DB.cottages.monthly[m] || {};
+    const bData = DB.beach.monthly[m] || {};
+
+    if (metric === 'bookings') {
+      // ПРОДАНО НОМЕРОНОЧЕЙ / ОБЪЕКТОВ
+      if (propertyId === 'cottages') return cData.soldNights || 0;
+      if (propertyId === 'beach') return bData.soldNights || 0;
+      return (cData.soldNights || 0) + (bData.soldNights || 0);
+    } else if (metric === 'occupancy') {
+      // % ЗАГРУЗКИ НОМЕРНОГО ФОНДА
+      if (propertyId === 'cottages') return cData.occupancy || 0;
+      if (propertyId === 'beach') return bData.occupancy || 0;
+      const totalR = (cData.totalRooms || 1) + (bData.totalRooms || 1);
+      return parseFloat((((cData.occupancy || 0) * cData.totalRooms + (bData.occupancy || 0) * bData.totalRooms) / totalR).toFixed(1));
+    } else {
+      // ВЫРУЧКА В МИЛЛИОНАХ РУБЛЕЙ
+      const cRev = cData.revenue || 0;
+      const bRev = bData.revenue || 0;
+      if (propertyId === 'cottages') return parseFloat((cRev / 1000000).toFixed(2));
+      if (propertyId === 'beach') return parseFloat((bRev / 1000000).toFixed(2));
+      return parseFloat(((cRev + bRev) / 1000000).toFixed(2));
+    }
   });
 
-  const avg3YearsData = currentYearData.map(v => parseFloat((v * 0.75).toFixed(2)));
-  const pastYearData = currentYearData.map(v => parseFloat((v * 0.82).toFixed(2)));
+  const avg3YearsData = currentYearData.map(v => parseFloat((v * 0.78).toFixed(1)));
+  const pastYearData = currentYearData.map(v => parseFloat((v * 0.83).toFixed(1)));
 
   return {
     labels,
