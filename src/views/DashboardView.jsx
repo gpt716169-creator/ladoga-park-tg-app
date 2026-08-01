@@ -497,7 +497,7 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* KPI Cards Grid С ДВОЙНЫМ СРАВНЕНИЕМ ДЛЯ ВСЕХ 4 КАРТОЧЕК: MOM & YOY */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1: Выручка */}
@@ -565,7 +565,7 @@ export const DashboardView = () => {
           </div>
         </div>
 
-        {/* KPI 3: Заезд гостей & Процент Загрузки c MoM и YoY сравнениями */}
+        {/* KPI 3: Заезд гостей */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between relative">
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
             // ЗАЕЗД ГОСТЕЙ / ЗАГРУЗКА
@@ -590,7 +590,7 @@ export const DashboardView = () => {
           </div>
         </div>
 
-        {/* KPI 4: ADR c MoM и YoY сравнениями */}
+        {/* KPI 4: ADR */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between relative">
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
             // СРЕДНЯЯ ЦЕНА (ADR)
@@ -692,7 +692,7 @@ export const DashboardView = () => {
           <HistoricalChart />
         </div>
 
-        {/* Marketing Card */}
+        {/* Marketing Card: Расходы на рекламу = 0, Стоимость брони CAC = 0 */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
           <h3 className="font-['Syne'] font-extrabold text-[17px] text-white uppercase mb-4 flex items-center gap-2 tracking-wide">
             <span className="material-symbols-outlined text-[#febf1a]">campaign</span>
@@ -701,11 +701,11 @@ export const DashboardView = () => {
           <div className="space-y-4 flex-1">
             <div className="pb-3 border-b border-[#c3f400]/15">
               <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">Расходы на рекламу</p>
-              <p className="font-['Manrope'] text-[22px] font-extrabold text-white tracking-tight mt-1">120 000 ₽</p>
+              <p className="font-['Manrope'] text-[22px] font-extrabold text-white tracking-tight mt-1">0 ₽</p>
             </div>
             <div className="pb-3 border-b border-[#c3f400]/15">
               <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">Стоимость брони (CAC)</p>
-              <p className="font-['Manrope'] text-[22px] font-extrabold text-[#c3f400] tracking-tight mt-1">450 ₽</p>
+              <p className="font-['Manrope'] text-[22px] font-extrabold text-[#c3f400] tracking-tight mt-1">0 ₽</p>
             </div>
             <div>
               <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">Выручка от допуслуг</p>
