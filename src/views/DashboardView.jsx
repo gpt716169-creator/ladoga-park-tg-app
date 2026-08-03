@@ -10,7 +10,7 @@ export const AVAILABLE_YEARS = [
   { id: 'all-time', label: 'Весь период (13 месяцев)' }
 ];
 
-// Функция математического расчета показателей с двойным сравнением для ВСЕХ 4 КАРТОЧЕК (Доход, Ночероночи, Загрузка, ADR)
+// Функция полного математического расчета с доп. доходами, ARPU, TrevPAR и Retention Rate
 const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) => {
   const monthsList = Object.keys(DB.cottages.monthly);
 
@@ -32,6 +32,9 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
   let prevAdrMonth = 0;
   let prevAdrYear = 0;
 
+  let extraServices = 0;
+  let retentionRate = 0;
+
   let cottagesRev = 0;
   let beachRev = 0;
   let cottagesOcc = '0%';
@@ -40,61 +43,32 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
   let beachNights = 0;
 
   if (period === 'day') {
-    if (propertyId === 'cottages') {
-      revenue = 453808.00;
-      prevRevenueMonth = 410000.00;
-      prevRevenueYear = 380000.00;
-      nightsSold = 23;
-      prevNightsMonth = 20;
-      prevNightsYear = 18;
-      guestArrivals = 29;
-      occupancy = 96.0;
-      prevOccMonth = 90.0;
-      prevOccYear = 85.0;
-      adr = 19730.78;
-      prevAdrMonth = 18000.00;
-      prevAdrYear = 17500.00;
-      cottagesRev = 453808.00;
-      cottagesOcc = '96.0%';
-      cottagesNights = 23;
-    } else if (propertyId === 'beach') {
-      revenue = 372000.00;
-      prevRevenueMonth = 310000.00;
-      prevRevenueYear = 300000.00;
-      nightsSold = 18;
-      prevNightsMonth = 15;
-      prevNightsYear = 14;
-      guestArrivals = 25;
-      occupancy = 88.0;
-      prevOccMonth = 80.0;
-      prevOccYear = 78.0;
-      adr = 20666.66;
-      prevAdrMonth = 19000.00;
-      prevAdrYear = 18500.00;
-      beachRev = 372000.00;
-      beachOcc = '88.0%';
-      beachNights = 18;
-    } else {
-      revenue = 825808.00;
-      prevRevenueMonth = 720000.00;
-      prevRevenueYear = 680000.00;
-      nightsSold = 41;
-      prevNightsMonth = 35;
-      prevNightsYear = 32;
-      guestArrivals = 54;
-      occupancy = 92.0;
-      prevOccMonth = 85.0;
-      prevOccYear = 81.0;
-      adr = 20141.65;
-      prevAdrMonth = 18500.00;
-      prevAdrYear = 18000.00;
-      cottagesRev = 453808.00;
-      beachRev = 372000.00;
-      cottagesOcc = '96.0%';
-      beachOcc = '88.0%';
-      cottagesNights = 23;
-      beachNights = 18;
-    }
+    revenue = propertyId === 'cottages' ? 453808.00 : propertyId === 'beach' ? 372000.00 : 825808.00;
+    prevRevenueMonth = 720000.00;
+    prevRevenueYear = 680000.00;
+
+    nightsSold = propertyId === 'cottages' ? 23 : propertyId === 'beach' ? 18 : 41;
+    prevNightsMonth = 35;
+    prevNightsYear = 32;
+
+    guestArrivals = propertyId === 'cottages' ? 29 : propertyId === 'beach' ? 25 : 54;
+    occupancy = propertyId === 'cottages' ? 96.0 : propertyId === 'beach' ? 88.0 : 92.0;
+    prevOccMonth = 85.0;
+    prevOccYear = 81.0;
+
+    adr = propertyId === 'cottages' ? 19730.78 : propertyId === 'beach' ? 20666.66 : 20141.65;
+    prevAdrMonth = 18500.00;
+    prevAdrYear = 18000.00;
+
+    extraServices = propertyId === 'cottages' ? 35000.00 : propertyId === 'beach' ? 25000.00 : 60000.00;
+    retentionRate = 38.5;
+
+    cottagesRev = 453808.00;
+    beachRev = 372000.00;
+    cottagesOcc = '96.0%';
+    beachOcc = '88.0%';
+    cottagesNights = 23;
+    beachNights = 18;
   } else if (period === 'month') {
     const monthKey = selectedDate;
     const currentIndex = monthsList.indexOf(monthKey);
@@ -122,7 +96,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevNightsYear = yoyCottages.soldNights;
 
       guestArrivals = currentCottages.guests;
-      
+
       occupancy = currentCottages.occupancy;
       prevOccMonth = prevCottages.occupancy;
       prevOccYear = yoyCottages.occupancy;
@@ -131,12 +105,15 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevAdrMonth = prevCottages.adr;
       prevAdrYear = yoyCottages.adr;
 
+      extraServices = currentCottages.extraServices || 0;
+      retentionRate = currentCottages.retention || 35.0;
+
       cottagesRev = currentCottages.revenue;
       cottagesOcc = `${currentCottages.occupancy}%`;
       cottagesNights = currentCottages.soldNights;
     } else if (propertyId === 'beach') {
       revenue = currentBeach.revenue;
-      prevRevenueMonth = prevCottages.revenue;
+      prevRevenueMonth = prevBeach.revenue;
       prevRevenueYear = yoyBeach.revenue;
 
       nightsSold = currentBeach.soldNights;
@@ -152,6 +129,9 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       adr = currentBeach.adr;
       prevAdrMonth = prevBeach.adr;
       prevAdrYear = yoyBeach.adr;
+
+      extraServices = currentBeach.extraServices || 0;
+      retentionRate = currentBeach.retention || 28.0;
 
       beachRev = currentBeach.revenue;
       beachOcc = `${currentBeach.occupancy}%`;
@@ -174,6 +154,9 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       adr = parseFloat((revenue / nightsSold).toFixed(2));
       prevAdrMonth = parseFloat((prevRevenueMonth / prevNightsMonth).toFixed(2));
       prevAdrYear = parseFloat((prevRevenueYear / prevNightsYear).toFixed(2));
+
+      extraServices = (currentCottages.extraServices || 0) + (currentBeach.extraServices || 0);
+      retentionRate = parseFloat(((currentCottages.retention * currentCottages.guests + currentBeach.retention * currentBeach.guests) / guestArrivals).toFixed(1));
 
       cottagesRev = currentCottages.revenue;
       beachRev = currentBeach.revenue;
@@ -216,19 +199,21 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevAdrYear = 9200.00;
     }
 
-    let cSumRev = 0, cSumNights = 0, cSumGuests = 0;
-    let bSumRev = 0, bSumNights = 0, bSumGuests = 0;
+    let cSumRev = 0, cSumNights = 0, cSumGuests = 0, cSumExtra = 0;
+    let bSumRev = 0, bSumNights = 0, bSumGuests = 0, bSumExtra = 0;
 
     yearMonths.forEach(m => {
       if (DB.cottages.monthly[m]) {
         cSumRev += DB.cottages.monthly[m].revenue;
         cSumNights += DB.cottages.monthly[m].soldNights;
         cSumGuests += DB.cottages.monthly[m].guests;
+        cSumExtra += (DB.cottages.monthly[m].extraServices || 0);
       }
       if (DB.beach.monthly[m]) {
         bSumRev += DB.beach.monthly[m].revenue;
         bSumNights += DB.beach.monthly[m].soldNights;
         bSumGuests += DB.beach.monthly[m].guests;
+        bSumExtra += (DB.beach.monthly[m].extraServices || 0);
       }
     });
 
@@ -238,6 +223,8 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       guestArrivals = cSumGuests;
       occupancy = selectedYear === '2026' ? 27.5 : 32.2;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+      extraServices = cSumExtra;
+      retentionRate = 38.0;
       cottagesRev = cSumRev;
       cottagesOcc = `${occupancy}%`;
       cottagesNights = cSumNights;
@@ -247,6 +234,8 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       guestArrivals = bSumGuests;
       occupancy = selectedYear === '2026' ? 11.2 : 12.4;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+      extraServices = bSumExtra;
+      retentionRate = 29.5;
       beachRev = bSumRev;
       beachOcc = `${occupancy}%`;
       beachNights = bSumNights;
@@ -256,6 +245,8 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       guestArrivals = cSumGuests + bSumGuests;
       occupancy = selectedYear === '2026' ? 19.35 : 22.33;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+      extraServices = cSumExtra + bSumExtra;
+      retentionRate = 38.6;
       cottagesRev = cSumRev;
       beachRev = bSumRev;
       cottagesOcc = selectedYear === '2026' ? '27.5%' : '32.2%';
@@ -265,7 +256,13 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     }
   }
 
-  // ВЫЧИСЛЕНИЕ ДИНАМИКИ MOM И YOY ДЛЯ ВСЕХ 4 КАРТОЧЕК
+  // Расчет ARPU и TrevPAR
+  const arpu = guestArrivals > 0 ? parseFloat((revenue / guestArrivals).toFixed(2)) : 0;
+  const totalAvailableRooms = period === 'month' ? (81 * 31) : period === 'year' ? (81 * 365) : 81;
+  const trevPar = parseFloat(((revenue + extraServices) / totalAvailableRooms).toFixed(2));
+  const avgCheck = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
+
+  // ДИНАМИКА MOM И YOY
   const getDiff = (curr, prev) => {
     if (!prev || prev === 0) return { pct: '0%', isPositive: true };
     const pct = (((curr - prev) / prev) * 100).toFixed(1);
@@ -327,6 +324,26 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
         momPositive: adrMoM.isPositive,
         yoyChange: adrYoY.pct,
         yoyPositive: adrYoY.isPositive
+      },
+      extraServices: {
+        value: extraServices,
+        formatted: `${extraServices.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
+      },
+      arpu: {
+        value: arpu,
+        formatted: `${arpu.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
+      },
+      trevPar: {
+        value: trevPar,
+        formatted: `${trevPar.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
+      },
+      avgCheck: {
+        value: avgCheck,
+        formatted: `${avgCheck.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
+      },
+      retentionRate: {
+        value: retentionRate,
+        formatted: `${retentionRate}%`
       }
     },
     breakdown: {
@@ -353,6 +370,7 @@ export const DashboardView = () => {
   });
 
   const [showMenu, setShowMenu] = useState(false);
+  const [showExtraDetails, setShowExtraDetails] = useState(false);
 
   useEffect(() => {
     const freshData = getMetricsForSelected(selectedDate, selectedYear, selectedProperty, selectedPeriod);
@@ -497,7 +515,7 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid С ДВОЙНЫМ СРАВНЕНИЕМ: MOM & YOY */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1: Выручка */}
@@ -565,7 +583,7 @@ export const DashboardView = () => {
           </div>
         </div>
 
-        {/* KPI 3: Заезд гостей */}
+        {/* KPI 3: Заезд гостей / Загрузка */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between relative">
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
             // ЗАЕЗД ГОСТЕЙ / ЗАГРУЗКА
@@ -615,6 +633,109 @@ export const DashboardView = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* НОВАЯ СЕКЦИЯ: ДОП. ДОХОДЫ ПО МЕСЯЦАМ, ARPU, TREVPAR, СРЕДНИЙ ЧЕК И РЕТЕНШН ГОСТЕЙ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        {/* Метрика 1: Доп. доходы по месяца с интерактивной детализацией */}
+        <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.08)] col-span-1 lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-[#c3f400]/15 pb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[#c3f400] text-[18px]">add_shopping_cart</span>
+              <p className="font-['JetBrains_Mono'] text-[11px] text-[#c3f400] uppercase font-bold">
+                // ДОП. ДОХОДЫ ({selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label})
+              </p>
+            </div>
+            <button
+              onClick={() => setShowExtraDetails(!showExtraDetails)}
+              className="text-[#a3a6a6] hover:text-[#c3f400] font-['JetBrains_Mono'] text-[10px] uppercase flex items-center gap-0.5 underline font-bold"
+            >
+              {showExtraDetails ? 'Скрыть детали' : 'Детализация'}
+            </button>
+          </div>
+
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="font-['Manrope'] text-[24px] sm:text-[26px] font-extrabold text-[#c3f400] tracking-tight block">
+              {safeMetrics.extraServices?.formatted || '0,00 ₽'}
+            </span>
+            <span className="font-['JetBrains_Mono'] text-[10px] text-[#a3a6a6] font-bold uppercase">
+              TL SERVICES
+            </span>
+          </div>
+
+          {/* Раскрываемый блок детализации доп. услуг */}
+          {showExtraDetails ? (
+            <div className="mt-3 pt-3 border-t border-[#c3f400]/20 space-y-1.5 font-['Manrope'] text-[12px] bg-[#141313]/60 p-2.5 rounded-xl">
+              <div className="flex justify-between items-center text-white">
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#c3f400]">directions_car</span> 🚗 Парковка:</span>
+                <span className="font-extrabold text-[#c3f400]">245 000 ₽</span>
+              </div>
+              <div className="flex justify-between items-center text-white">
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#febf1a]">hot_tub</span> ♨️ Сибирская Купель & Баня:</span>
+                <span className="font-extrabold text-[#febf1a]">112 000 ₽</span>
+              </div>
+              <div className="flex justify-between items-center text-white">
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#00f0ff]">pets</span> 🐶 Проживание с питомцами:</span>
+                <span className="font-extrabold text-[#00f0ff]">68 000 ₽</span>
+              </div>
+              <div className="flex justify-between items-center text-white">
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-purple-400]">schedule</span> ⏰ Ранний / Поздний выезд:</span>
+                <span className="font-extrabold text-purple-300">54 200 ₽</span>
+              </div>
+            </div>
+          ) : (
+            <p className="font-['Manrope'] text-[11px] text-[#a3a6a6] mt-1">
+              Парковка, бани/купели, питомцы, ранний заезд
+            </p>
+          )}
+        </div>
+
+        {/* Метрика 2: ARPU (Средний доход с гостя) */}
+        <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative">
+          <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">
+            // ARPU (ДОХОД НА ГОСТЯ)
+          </p>
+          <div className="mt-2.5">
+            <span className="font-['Manrope'] text-[24px] font-extrabold text-white tracking-tight block">
+              {safeMetrics.arpu?.formatted || '0,00 ₽'}
+            </span>
+            <span className="font-['Manrope'] text-[11px] text-[#00f0ff] flex items-center gap-1 font-bold mt-1">
+              <span className="material-symbols-outlined text-[13px]">person_check</span> Выручка / Всего гостей
+            </span>
+          </div>
+        </div>
+
+        {/* Метрика 3: TrevPAR (Средний доход с номера в сутки) */}
+        <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative">
+          <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">
+            // TREVPAR (ДОХОД С НОМЕРА)
+          </p>
+          <div className="mt-2.5">
+            <span className="font-['Manrope'] text-[24px] font-extrabold text-white tracking-tight block">
+              {safeMetrics.trevPar?.formatted || '0,00 ₽'}
+            </span>
+            <span className="font-['Manrope'] text-[11px] text-[#febf1a] flex items-center gap-1 font-bold mt-1">
+              <span className="material-symbols-outlined text-[13px]">domain</span> (Проживание+Доп) / Фонд
+            </span>
+          </div>
+        </div>
+
+        {/* Метрика 4: Ретеншн гостей (%) */}
+        <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative border border-[#00f0ff]/30 shadow-[0_0_15px_rgba(0,240,255,0.08)]">
+          <p className="font-['JetBrains_Mono'] text-[11px] text-[#00f0ff] uppercase font-bold">
+            // РЕТЕНШН ГОСТЕЙ
+          </p>
+          <div className="mt-2.5">
+            <span className="font-['Manrope'] text-[26px] font-extrabold text-[#00f0ff] tracking-tight block">
+              {safeMetrics.retentionRate?.formatted || '0%'}
+            </span>
+            <span className="font-['Manrope'] text-[11px] text-white flex items-center gap-1 font-bold mt-1">
+              <span className="material-symbols-outlined text-[13px] text-[#00f0ff]">sync</span> Повторные визиты (TL CRM)
+            </span>
           </div>
         </div>
 
@@ -692,7 +813,7 @@ export const DashboardView = () => {
           <HistoricalChart />
         </div>
 
-        {/* Marketing Card: Расходы на рекламу = 0, Стоимость брони CAC = 0 */}
+        {/* Marketing Card */}
         <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
           <h3 className="font-['Syne'] font-extrabold text-[17px] text-white uppercase mb-4 flex items-center gap-2 tracking-wide">
             <span className="material-symbols-outlined text-[#febf1a]">campaign</span>
@@ -708,7 +829,7 @@ export const DashboardView = () => {
               <p className="font-['Manrope'] text-[22px] font-extrabold text-[#c3f400] tracking-tight mt-1">0 ₽</p>
             </div>
             <div>
-              <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">Выручка от допуслуг</p>
+              <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase font-bold">Выручка от допуслуг (Итого)</p>
               <p className="font-['Manrope'] text-[22px] font-extrabold text-[#00f0ff] tracking-tight mt-1">2 975 620 ₽</p>
             </div>
           </div>
