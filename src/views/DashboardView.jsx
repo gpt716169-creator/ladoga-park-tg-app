@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useApp, AVAILABLE_MONTHS } from '../context/AppContext';
 import { fetchTLMetrics, PROPERTIES } from '../services/travelLineService';
 import { HistoricalChart } from '../components/HistoricalChart';
-import DB from '../../database.json';
 
 export const AVAILABLE_YEARS = [
   { id: '2026', label: '2026 Календарный год (с 1 янв)' },
@@ -50,28 +49,28 @@ export const DashboardView = () => {
   const safeExtraBreakdown = safeMetrics.extraServices?.breakdown || {};
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-5 pb-28 pt-2">
       
-      {/* Шапка Дашборда в стиле WIBE */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#c3f400]/20">
+      {/* Шапка Дашборда в стиле WIBE (Адаптировано для Telegram WebApp) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#c3f400]/20">
         <div>
-          <div className="flex items-center text-[#c3f400] font-['JetBrains_Mono'] text-[11px] uppercase gap-1.5 mb-1 font-bold">
+          <div className="flex items-center text-[#c3f400] font-['JetBrains_Mono'] text-[10px] sm:text-[11px] uppercase gap-1.5 mb-1 font-bold tracking-tight">
             <span>// ДАШБОРД LIVE TRAVELLINE</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-white">{currentPropertyObj.name}</span>
+            <span className="material-symbols-outlined text-[12px] sm:text-[14px]">chevron_right</span>
+            <span className="text-white truncate max-w-[180px] sm:max-w-none">{currentPropertyObj.name}</span>
           </div>
-          <h2 className="font-['Syne'] font-extrabold text-[24px] sm:text-[32px] tracking-wide text-white uppercase flex items-center gap-2">
+          <h2 className="font-['Syne'] font-extrabold text-[20px] sm:text-[28px] tracking-wide text-white uppercase flex items-center gap-2 leading-tight">
             ПОКАЗАТЕЛИ В ДИНАМИКЕ
-            {loading && <span className="material-symbols-outlined text-[#c3f400] animate-spin text-[24px]">sync</span>}
+            {loading && <span className="material-symbols-outlined text-[#c3f400] animate-spin text-[20px]">sync</span>}
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Кнопки периодов */}
           <div className="flex bg-[#141313] p-1 rounded-xl border border-[#c3f400]/20 font-['JetBrains_Mono'] text-[11px]">
             <button
               onClick={() => setSelectedPeriod('day')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1 rounded-lg transition-all ${
                 selectedPeriod === 'day'
                   ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
                   : 'text-[#a3a6a6] hover:text-white'
@@ -81,7 +80,7 @@ export const DashboardView = () => {
             </button>
             <button
               onClick={() => setSelectedPeriod('month')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1 rounded-lg transition-all ${
                 selectedPeriod === 'month'
                   ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
                   : 'text-[#a3a6a6] hover:text-white'
@@ -91,7 +90,7 @@ export const DashboardView = () => {
             </button>
             <button
               onClick={() => setSelectedPeriod('year')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1 rounded-lg transition-all ${
                 selectedPeriod === 'year'
                   ? 'bg-[#c3f400] text-black font-extrabold shadow-[0_0_15px_rgba(195,244,0,0.4)]'
                   : 'text-[#a3a6a6] hover:text-white'
@@ -101,19 +100,19 @@ export const DashboardView = () => {
             </button>
           </div>
 
-          {/* Интерактивный выпадающий список / Селектор даты для ДНЯ */}
+          {/* Интерактивный селектор даты для ДНЯ */}
           {selectedPeriod === 'day' ? (
-            <div className="flex items-center gap-2 bg-[#141313] px-3.5 py-1.5 rounded-xl border border-[#c3f400]/40 shadow-[0_0_15px_rgba(195,244,0,0.15)]">
-              <span className="material-symbols-outlined text-[18px] text-[#c3f400]">today</span>
+            <div className="flex items-center gap-2 bg-[#141313] px-3 py-1 rounded-xl border border-[#c3f400]/40 shadow-[0_0_15px_rgba(195,244,0,0.15)]">
+              <span className="material-symbols-outlined text-[16px] text-[#c3f400]">today</span>
               <div>
-                <span className="font-['JetBrains_Mono'] text-[9px] text-[#a3a6a6] uppercase tracking-wider font-bold block">
+                <span className="font-['JetBrains_Mono'] text-[8px] text-[#a3a6a6] uppercase tracking-wider font-bold block">
                   ВЫБОР ДНЯ
                 </span>
                 <input
                   type="date"
                   value={selectedDay}
                   onChange={(e) => setSelectedDay(e.target.value)}
-                  className="bg-transparent text-white font-['Manrope'] font-extrabold text-[13px] outline-none cursor-pointer"
+                  className="bg-transparent text-white font-['Manrope'] font-extrabold text-[12px] outline-none cursor-pointer"
                 />
               </div>
             </div>
@@ -121,26 +120,26 @@ export const DashboardView = () => {
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="flex items-center gap-2 bg-[#141313] hover:bg-[#1f1d1d] px-3.5 py-2 rounded-xl border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.1)] transition-all"
+                className="flex items-center gap-2 bg-[#141313] hover:bg-[#1f1d1d] px-3 py-1.5 rounded-xl border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.1)] transition-all"
               >
-                <span className="material-symbols-outlined text-[18px] text-[#c3f400]">
+                <span className="material-symbols-outlined text-[16px] text-[#c3f400]">
                   {selectedPeriod === 'year' ? 'date_range' : 'calendar_month'}
                 </span>
                 <div className="text-left">
-                  <span className="font-['Manrope'] font-extrabold text-[13px] text-white block leading-none">
+                  <span className="font-['Manrope'] font-extrabold text-[12px] text-white block leading-none">
                     {selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label}
                   </span>
-                  <span className="font-['JetBrains_Mono'] text-[9px] text-[#a3a6a6] uppercase tracking-wider font-bold">
+                  <span className="font-['JetBrains_Mono'] text-[8px] text-[#a3a6a6] uppercase tracking-wider font-bold">
                     {selectedPeriod === 'year' ? 'ОТЧЕТНЫЙ ГОД' : 'ОТЧЕТНЫЙ МЕСЯЦ'}
                   </span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-[#c3f400] ml-1">expand_more</span>
+                <span className="material-symbols-outlined text-[14px] text-[#c3f400] ml-0.5">expand_more</span>
               </button>
 
-              {/* Выпадающее меню */}
+              {/* Выпадающее меню периода (Адаптировано под мобильные экраны) */}
               {showMenu && (
-                <div className="absolute top-14 right-0 w-64 bg-[#141313]/95 backdrop-blur-2xl border border-[#c3f400]/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] z-50 p-2 space-y-1 max-h-72 overflow-y-auto">
-                  <div className="px-3 py-1.5 font-['JetBrains_Mono'] text-[10px] text-[#c3f400] uppercase tracking-widest font-bold border-b border-[#c3f400]/15 mb-1">
+                <div className="absolute top-12 left-0 sm:left-auto sm:right-0 w-64 max-w-[85vw] bg-[#141313]/98 backdrop-blur-2xl border border-[#c3f400]/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.95)] z-50 p-2 space-y-1 max-h-64 overflow-y-auto">
+                  <div className="px-3 py-1.5 font-['JetBrains_Mono'] text-[9px] text-[#c3f400] uppercase tracking-widest font-bold border-b border-[#c3f400]/15 mb-1">
                     // {selectedPeriod === 'year' ? 'ВЫБОР КАЛЕНДАРНОГО ГОДА' : 'ВСЕ ОТЧЕТНЫЕ МЕСЯЦЫ'}
                   </div>
 
@@ -158,9 +157,9 @@ export const DashboardView = () => {
                               : 'text-[#e5e2e1] hover:bg-[#262424]'
                           }`}
                         >
-                          <span className="text-[13px]">{y.label}</span>
+                          <span className="text-[12px]">{y.label}</span>
                           {selectedYear === y.id && (
-                            <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
+                            <span className="material-symbols-outlined text-[14px] text-[#c3f400]">check_circle</span>
                           )}
                         </button>
                       ))
@@ -178,9 +177,9 @@ export const DashboardView = () => {
                               : 'text-[#e5e2e1] hover:bg-[#262424]'
                           }`}
                         >
-                          <span className="text-[13px]">{m.label}</span>
+                          <span className="text-[12px]">{m.label}</span>
                           {selectedDate === m.id && (
-                            <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
+                            <span className="material-symbols-outlined text-[14px] text-[#c3f400]">check_circle</span>
                           )}
                         </button>
                       ))}
