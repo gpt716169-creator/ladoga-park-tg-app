@@ -31,12 +31,19 @@ export const DashboardView = () => {
         setData(res);
       }
       setLoading(false);
+    }).catch(err => {
+      console.error('Fetch TL Metrics Error:', err);
+      setLoading(false);
     });
   }, [selectedProperty, selectedPeriod, selectedDate, selectedYear, selectedDay]);
 
-  const currentPropertyObj = PROPERTIES[selectedProperty.toUpperCase()] || PROPERTIES.ALL;
-  const currentMonthObj = AVAILABLE_MONTHS.find(m => m.id === selectedDate) || AVAILABLE_MONTHS[0];
-  const currentYearObj = AVAILABLE_YEARS.find(y => y.id === selectedYear) || AVAILABLE_YEARS[0];
+  const safeMonths = AVAILABLE_MONTHS || [];
+  const safeYears = AVAILABLE_YEARS || [];
+  const safeProperties = PROPERTIES || {};
+
+  const currentPropertyObj = safeProperties[(selectedProperty || 'all').toUpperCase()] || safeProperties.ALL || { name: 'Все объекты', icon: 'domain' };
+  const currentMonthObj = safeMonths.find(m => m && m.id === selectedDate) || safeMonths[0] || { label: 'Июль 2026' };
+  const currentYearObj = safeYears.find(y => y && y.id === selectedYear) || safeYears[0] || { label: '2026' };
 
   const safeMetrics = data?.metrics || {};
   const safeBreakdown = data?.breakdown || {};
@@ -138,7 +145,7 @@ export const DashboardView = () => {
                   </div>
 
                   {selectedPeriod === 'year'
-                    ? AVAILABLE_YEARS.map((y) => (
+                    ? safeYears.map((y) => (
                         <button
                           key={y.id}
                           onClick={() => {
@@ -157,7 +164,7 @@ export const DashboardView = () => {
                           )}
                         </button>
                       ))
-                    : AVAILABLE_MONTHS.map((m) => (
+                    : safeMonths.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => {

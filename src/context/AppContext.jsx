@@ -25,8 +25,8 @@ export const AppProvider = ({ children }) => {
   });
 
   const [selectedProperty, setSelectedProperty] = useState('all');
-  const [selectedPeriod, setSelectedPeriod] = useState('month'); // По умолчанию Месяц
-  const [selectedDate, setSelectedDate] = useState('2026-07');    // По умолчанию самый актуальный месяц Июль 2026
+  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [selectedDate, setSelectedDate] = useState('2026-07');
 
   const [tlConfig, setTlConfig] = useState(getTLConfig);
 
@@ -40,14 +40,25 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('ladoga_theme', theme);
   }, [theme]);
 
+  // Безопасный вызов Telegram WebApp (совместимость с версии 6.0)
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      if (tg.setHeaderColor) {
-        tg.setHeaderColor('#0e0d0d');
+    try {
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // Защита от ошибок версии Telegram 6.0
+        if (typeof tg.setHeaderColor === 'function') {
+          try {
+            tg.setHeaderColor('#0e0d0d');
+          } catch (err) {
+            console.log('Telegram WebApp v6.0 setHeaderColor not supported');
+          }
+        }
       }
+    } catch (e) {
+      console.log('Telegram WebApp init bypass', e);
     }
   }, [theme]);
 
@@ -105,4 +116,10 @@ export const AppProvider = ({ children }) => {
   );
 };
 
-export const useApp = () => useContext(AppContext);
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};
