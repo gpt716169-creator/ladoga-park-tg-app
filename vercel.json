@@ -1,9 +1,7 @@
 {
-  "version": 2,
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/travelline/(.*)", "destination": "/api/travelline" },
+    { "source": "/api/travelline", "destination": "/api/travelline" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
