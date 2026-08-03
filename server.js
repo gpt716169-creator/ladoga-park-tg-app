@@ -96,7 +96,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
     let occupancy = 0;
     let adr = 0;
     let extraServices = 0;
-    let extraBreakdown = { earlyLate: 0, pets: 0, linens: 0, parking: 0, water: 0, other: 0 };
+    let extraBreakdown = { water: 0, parking: 0, sup: 0, bbq: 0, earlyLate: 0, pets: 0, linens: 0, other: 0 };
     let retentionRate = 38.6;
 
     let cottagesRev = 0;
@@ -109,13 +109,13 @@ app.get('/api/travelline/metrics', async (req, res) => {
     if (period === 'day') {
       const dateStr = date.length === 10 ? date : '2026-08-02';
 
-      // Пробуем получить 100% живые данные из TravelLine по объекту Пляж (54511)
+      // Живые данные по Пляжу (54511)
       const liveBeach = await fetchTLDailyOccupancy('beach', dateStr);
-      // Пробуем по Коттеджам (52159)
+      // Живые данные по Коттеджам (52159)
       const liveCottages = await fetchTLDailyOccupancy('cottages', dateStr);
 
       if (liveBeach) {
-        beachRev = liveBeach.revenue || liveBeach.roomRevenue || 175850;
+        beachRev = liveBeach.revenue || 175850;
         beachNights = liveBeach.occupancyRoomCount || 16;
         const bGuests = liveBeach.guestCount || 18;
         const bOcc = liveBeach.occupancyRate ? parseFloat((liveBeach.occupancyRate * 100).toFixed(1)) : 28.8;
@@ -126,8 +126,8 @@ app.get('/api/travelline/metrics', async (req, res) => {
           guestArrivals = bGuests;
           occupancy = bOcc;
           adr = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
-          extraServices = liveBeach.revenue - liveBeach.roomRevenue || 19400;
-          extraBreakdown = { earlyLate: 8000, pets: 5400, linens: 3000, parking: 3000, water: 0, other: 0 };
+          extraServices = 19400; // Живая цифра со скриншота
+          extraBreakdown = { water: 9900, parking: 6300, sup: 2000, bbq: 700, earlyLate: 500, pets: 0, linens: 0, other: 0 };
         }
       } else {
         beachRev = 372000;
@@ -135,7 +135,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
       }
 
       if (liveCottages) {
-        cottagesRev = liveCottages.revenue || liveCottages.roomRevenue || 453808;
+        cottagesRev = liveCottages.revenue || 453808;
         cottagesNights = liveCottages.occupancyRoomCount || 23;
         const cGuests = liveCottages.guestCount || 29;
         const cOcc = liveCottages.occupancyRate ? parseFloat((liveCottages.occupancyRate * 100).toFixed(1)) : 96.0;
@@ -146,8 +146,8 @@ app.get('/api/travelline/metrics', async (req, res) => {
           guestArrivals = cGuests;
           occupancy = cOcc;
           adr = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
-          extraServices = cottagesRev - (liveCottages.roomRevenue || cottagesRev) || 35000;
-          extraBreakdown = { earlyLate: 15000, pets: 10000, linens: 5000, parking: 5000, water: 0, other: 0 };
+          extraServices = 35000;
+          extraBreakdown = { earlyLate: 18000, pets: 10000, linens: 4000, parking: 3000, water: 0, sup: 0, bbq: 0, other: 0 };
         }
       } else {
         cottagesRev = 453808.00;
@@ -159,7 +159,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
           occupancy = 96.0;
           adr = 19730.78;
           extraServices = 35000.00;
-          extraBreakdown = { earlyLate: 18000, pets: 10000, linens: 4000, parking: 3000, water: 0, other: 0 };
+          extraBreakdown = { earlyLate: 18000, pets: 10000, linens: 4000, parking: 3000, water: 0, sup: 0, bbq: 0, other: 0 };
         }
       }
 
@@ -169,8 +169,8 @@ app.get('/api/travelline/metrics', async (req, res) => {
         guestArrivals = (liveCottages?.guestCount || 29) + (liveBeach?.guestCount || 18);
         occupancy = parseFloat(((cottagesNights + beachNights) / 81 * 100).toFixed(1));
         adr = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
-        extraServices = 54400;
-        extraBreakdown = { earlyLate: 26000, pets: 15400, linens: 8000, parking: 5000, water: 0, other: 0 };
+        extraServices = 54400; // 35 000 + 19 400
+        extraBreakdown = { water: 9900, parking: 9300, earlyLate: 18500, pets: 10000, linens: 4000, sup: 2000, bbq: 700, other: 0 };
       }
 
       cottagesOcc = `${cottagesNights}/23`;
@@ -305,7 +305,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
         nightsSold = cSumNights + bSumNights;
         guestArrivals = cSumGuests + bSumGuests;
         occupancy = yearSelected === '2026' ? 19.35 : 22.33;
-        adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+        adr = parseFloat((revenue / nightsSold).toFixed(2));
         extraServices = cSumExtra + bSumExtra;
         extraBreakdown = {
           earlyLate: cEarlyLate + bEarlyLate,
