@@ -30,19 +30,36 @@
       "occupancy": 27.5
     },
     "monthly": {
-      "2025-07": { "revenue": 6399951.00, "soldNights": 486, "guests": 804, "adr": 13168.62, "revPar": 8976.09, "totalRooms": 23, "occupancy": 74.65, "extraServices": 284000.00, "extraBreakdown": { "parking": 115000, "hotTub": 58000, "pets": 35000, "earlyLate": 28000, "other": 48000 }, "retention": 41.2 },
-      "2025-08": { "revenue": 4953152.00, "soldNights": 368, "guests": 555, "adr": 13459.65, "revPar": 6946.92, "totalRooms": 23, "occupancy": 53.57, "extraServices": 221000.00, "extraBreakdown": { "parking": 92000, "hotTub": 45000, "pets": 28000, "earlyLate": 21000, "other": 35000 }, "retention": 39.5 },
-      "2025-09": { "revenue": 1033285.71, "soldNights": 86, "guests": 142, "adr": 12014.95, "revPar": 1497.52, "totalRooms": 23, "occupancy": 12.46, "extraServices": 78000.00, "extraBreakdown": { "parking": 32000, "hotTub": 18000, "pets": 11000, "earlyLate": 7000, "other": 10000 }, "retention": 32.0 },
-      "2025-10": { "revenue": 555989.29, "soldNights": 54, "guests": 89, "adr": 10296.10, "revPar": 780.88, "totalRooms": 23, "occupancy": 7.58, "extraServices": 45000.00, "extraBreakdown": { "parking": 18000, "hotTub": 12000, "pets": 6000, "earlyLate": 4000, "other": 5000 }, "retention": 28.4 },
-      "2025-11": { "revenue": 479427.20, "soldNights": 48, "guests": 76, "adr": 9988.06, "revPar": 694.82, "totalRooms": 23, "occupancy": 6.96, "extraServices": 39000.00, "extraBreakdown": { "parking": 15000, "hotTub": 10000, "pets": 5000, "earlyLate": 4000, "other": 5000 }, "retention": 25.1 },
-      "2025-12": { "revenue": 548774.82, "soldNights": 52, "guests": 83, "adr": 10553.36, "revPar": 770.75, "totalRooms": 23, "occupancy": 7.30, "extraServices": 42000.00, "extraBreakdown": { "parking": 16000, "hotTub": 11000, "pets": 6000, "earlyLate": 4000, "other": 5000 }, "retention": 29.0 },
-      "2026-01": { "revenue": 1194960.00, "soldNights": 101, "guests": 164, "adr": 11831.28, "revPar": 1675.96, "totalRooms": 23, "occupancy": 14.16, "extraServices": 95000.00, "extraBreakdown": { "parking": 38000, "hotTub": 24000, "pets": 12000, "earlyLate": 9000, "other": 12000 }, "retention": 35.8 },
-      "2026-02": { "revenue": 479427.20, "soldNights": 69, "guests": 108, "adr": 6948.22, "revPar": 744.45, "totalRooms": 23, "occupancy": 10.71, "extraServices": 41000.00, "extraBreakdown": { "parking": 16000, "hotTub": 11000, "pets": 5000, "earlyLate": 4000, "other": 5000 }, "retention": 30.2 },
-      "2026-03": { "revenue": 503565.86, "soldNights": 79, "guests": 121, "adr": 6374.25, "revPar": 706.26, "totalRooms": 23, "occupancy": 11.08, "extraServices": 48000.00, "extraBreakdown": { "parking": 19000, "hotTub": 13000, "pets": 6000, "earlyLate": 5000, "other": 5000 }, "retention": 31.5 },
-      "2026-04": { "revenue": 384200.00, "soldNights": 62, "guests": 98, "adr": 6196.77, "revPar": 556.81, "totalRooms": 23, "occupancy": 8.99, "extraServices": 36000.00, "extraBreakdown": { "parking": 14000, "hotTub": 10000, "pets": 4000, "earlyLate": 4000, "other": 4000 }, "retention": 27.8 },
-      "2026-05": { "revenue": 1609200.00, "soldNights": 126, "guests": 194, "adr": 12771.43, "revPar": 2256.94, "totalRooms": 23, "occupancy": 17.67, "extraServices": 115000.00, "extraBreakdown": { "parking": 45000, "hotTub": 32000, "pets": 15000, "earlyLate": 10000, "other": 13000 }, "retention": 34.0 },
-      "2026-06": { "revenue": 3775477.46, "soldNights": 266, "guests": 452, "adr": 14193.52, "revPar": 5471.71, "totalRooms": 23, "occupancy": 38.55, "extraServices": 210000.00, "extraBreakdown": { "parking": 85000, "hotTub": 55000, "pets": 28000, "earlyLate": 18000, "other": 24000 }, "retention": 36.8 },
-      "2026-07": { "revenue": 8018663.00, "soldNights": 512, "guests": 789, "adr": 15661.45, "revPar": 11246.37, "totalRooms": 23, "occupancy": 71.81, "extraServices": 365000.00, "extraBreakdown": { "parking": 155000, "hotTub": 88000, "pets": 45000, "earlyLate": 34200, "other": 42800 }, "retention": 42.5 }
+      "2025-07": { "revenue": 6399951.00, "soldNights": 486, "guests": 804, "adr": 13168.62, "revPar": 8976.09, "totalRooms": 23, "occupancy": 74.65, "extraServices": 284000.00, "extraBreakdown": { "earlyLate": 132000, "pets": 78000, "parking": 35000, "linens": 12000, "water": 4500, "other": 22500 }, "retention": 41.2 },
+      "2025-08": { "revenue": 4953152.00, "soldNights": 368, "guests": 555, "adr": 13459.65, "revPar": 6946.92, "totalRooms": 23, "occupancy": 53.57, "extraServices": 221000.00, "extraBreakdown": { "earlyLate": 105000, "pets": 58000, "parking": 28000, "linens": 10000, "water": 3500, "other": 16500 }, "retention": 39.5 },
+      "2025-09": { "revenue": 1033285.71, "soldNights": 86, "guests": 142, "adr": 12014.95, "revPar": 1497.52, "totalRooms": 23, "occupancy": 12.46, "extraServices": 78000.00, "extraBreakdown": { "earlyLate": 38000, "pets": 22000, "parking": 9000, "linens": 4000, "water": 1500, "other": 3500 }, "retention": 32.0 },
+      "2025-10": { "revenue": 555989.29, "soldNights": 54, "guests": 89, "adr": 10296.10, "revPar": 780.88, "totalRooms": 23, "occupancy": 7.58, "extraServices": 45000.00, "extraBreakdown": { "earlyLate": 22000, "pets": 12000, "parking": 5000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 28.4 },
+      "2025-11": { "revenue": 479427.20, "soldNights": 48, "guests": 76, "adr": 9988.06, "revPar": 694.82, "totalRooms": 23, "occupancy": 6.96, "extraServices": 39000.00, "extraBreakdown": { "earlyLate": 18000, "pets": 10000, "parking": 5000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 25.1 },
+      "2025-12": { "revenue": 548774.82, "soldNights": 52, "guests": 83, "adr": 10553.36, "revPar": 770.75, "totalRooms": 23, "occupancy": 7.30, "extraServices": 42000.00, "extraBreakdown": { "earlyLate": 20000, "pets": 11000, "parking": 5000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 29.0 },
+      "2026-01": { "revenue": 1194960.00, "soldNights": 101, "guests": 164, "adr": 11831.28, "revPar": 1675.96, "totalRooms": 23, "occupancy": 14.16, "extraServices": 95000.00, "extraBreakdown": { "earlyLate": 48000, "pets": 24000, "parking": 12000, "linens": 5000, "water": 2000, "other": 4000 }, "retention": 35.8 },
+      "2026-02": { "revenue": 479427.20, "soldNights": 69, "guests": 108, "adr": 6948.22, "revPar": 744.45, "totalRooms": 23, "occupancy": 10.71, "extraServices": 41000.00, "extraBreakdown": { "earlyLate": 20000, "pets": 10000, "parking": 5000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 30.2 },
+      "2026-03": { "revenue": 503565.86, "soldNights": 79, "guests": 121, "adr": 6374.25, "revPar": 706.26, "totalRooms": 23, "occupancy": 11.08, "extraServices": 48000.00, "extraBreakdown": { "earlyLate": 24000, "pets": 12000, "parking": 6000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 31.5 },
+      "2026-04": { "revenue": 384200.00, "soldNights": 62, "guests": 98, "adr": 6196.77, "revPar": 556.81, "totalRooms": 23, "occupancy": 8.99, "extraServices": 36000.00, "extraBreakdown": { "earlyLate": 18000, "pets": 9000, "parking": 4000, "linens": 3000, "water": 1000, "other": 1000 }, "retention": 27.8 },
+      "2026-05": { "revenue": 1609200.00, "soldNights": 126, "guests": 194, "adr": 12771.43, "revPar": 2256.94, "totalRooms": 23, "occupancy": 17.67, "extraServices": 115000.00, "extraBreakdown": { "earlyLate": 58000, "pets": 32000, "parking": 14000, "linens": 6000, "water": 2000, "other": 3000 }, "retention": 34.0 },
+      "2026-06": { 
+        "revenue": 3775477.46, 
+        "soldNights": 266, 
+        "guests": 452, 
+        "adr": 14193.52, 
+        "revPar": 5471.71, 
+        "totalRooms": 23, 
+        "occupancy": 38.55, 
+        "extraServices": 187340.00, 
+        "extraBreakdown": { 
+          "earlyLate": 107000.00, 
+          "pets": 64000.00, 
+          "linens": 8000.00, 
+          "parking": 6000.00, 
+          "water": 2340.00 
+        }, 
+        "retention": 36.8 
+      },
+      "2026-07": { "revenue": 8018663.00, "soldNights": 512, "guests": 789, "adr": 15661.45, "revPar": 11246.37, "totalRooms": 23, "occupancy": 71.81, "extraServices": 365000.00, "extraBreakdown": { "earlyLate": 185000, "pets": 110000, "parking": 42000, "linens": 16000, "water": 4500, "other": 7500 }, "retention": 42.5 }
     }
   },
   "beach": {
@@ -57,19 +74,36 @@
       "occupancy": 12.4
     },
     "monthly": {
-      "2025-07": { "revenue": 5024987.00, "soldNights": 728, "guests": 6356, "adr": 6902.45, "revPar": 2794.76, "totalRooms": 58, "occupancy": 40.48, "extraServices": 195000.00, "extraBreakdown": { "parking": 85000, "hotTub": 42000, "pets": 25000, "earlyLate": 18000, "other": 25000 }, "retention": 31.0 },
-      "2025-08": { "revenue": 3854200.00, "soldNights": 379, "guests": 3951, "adr": 10169.39, "revPar": 2143.60, "totalRooms": 58, "occupancy": 21.07, "extraServices": 164000.00, "extraBreakdown": { "parking": 72000, "hotTub": 38000, "pets": 21000, "earlyLate": 15000, "other": 18000 }, "retention": 29.4 },
-      "2025-09": { "revenue": 1048285.71, "soldNights": 126, "guests": 840, "adr": 8319.72, "revPar": 602.46, "totalRooms": 58, "occupancy": 7.24, "extraServices": 48000.00, "extraBreakdown": { "parking": 21000, "hotTub": 12000, "pets": 6000, "earlyLate": 4000, "other": 5000 }, "retention": 22.0 },
-      "2025-10": { "revenue": 555989.29, "soldNights": 118, "guests": 312, "adr": 4711.77, "revPar": 309.22, "totalRooms": 58, "occupancy": 6.56, "extraServices": 31000.00, "extraBreakdown": { "parking": 14000, "hotTub": 8000, "pets": 4000, "earlyLate": 2000, "other": 3000 }, "retention": 19.5 },
-      "2025-11": { "revenue": 410742.80, "soldNights": 94, "guests": 245, "adr": 4369.60, "revPar": 236.05, "totalRooms": 58, "occupancy": 5.40, "extraServices": 25000.00, "extraBreakdown": { "parking": 11000, "hotTub": 6000, "pets": 3000, "earlyLate": 2000, "other": 3000 }, "retention": 18.0 },
-      "2025-12": { "revenue": 272705.18, "soldNights": 65, "guests": 198, "adr": 4195.46, "revPar": 151.67, "totalRooms": 58, "occupancy": 3.61, "extraServices": 22000.00, "extraBreakdown": { "parking": 10000, "hotTub": 5000, "pets": 3000, "earlyLate": 2000, "other": 2000 }, "retention": 20.1 },
-      "2026-01": { "revenue": 372230.00, "soldNights": 65, "guests": 210, "adr": 5726.61, "revPar": 207.02, "totalRooms": 58, "occupancy": 3.61, "extraServices": 32000.00, "extraBreakdown": { "parking": 14000, "hotTub": 8000, "pets": 4000, "earlyLate": 3000, "other": 3000 }, "retention": 24.0 },
-      "2026-02": { "revenue": 127410.00, "soldNights": 49, "guests": 154, "adr": 2600.20, "revPar": 78.45, "totalRooms": 58, "occupancy": 3.01, "extraServices": 18000.00, "extraBreakdown": { "parking": 8000, "hotTub": 4000, "pets": 2000, "earlyLate": 2000, "other": 2000 }, "retention": 19.8 },
-      "2026-03": { "revenue": 226340.00, "soldNights": 63, "guests": 186, "adr": 3592.69, "revPar": 125.88, "totalRooms": 58, "occupancy": 3.50, "extraServices": 21000.00, "extraBreakdown": { "parking": 9000, "hotTub": 5000, "pets": 3000, "earlyLate": 2000, "other": 2000 }, "retention": 21.0 },
-      "2026-04": { "revenue": 440030.00, "soldNights": 72, "guests": 215, "adr": 6111.52, "revPar": 252.89, "totalRooms": 58, "occupancy": 4.13, "extraServices": 29000.00, "extraBreakdown": { "parking": 13000, "hotTub": 7000, "pets": 4000, "earlyLate": 2000, "other": 3000 }, "retention": 22.5 },
-      "2026-05": { "revenue": 3328877.02, "soldNights": 285, "guests": 301, "adr": 11680.27, "revPar": 1851.43, "totalRooms": 58, "occupancy": 15.85, "extraServices": 100400.00, "extraBreakdown": { "parking": 44000, "hotTub": 24000, "pets": 14000, "earlyLate": 8400, "other": 10000 }, "retention": 26.2 },
-      "2026-06": { "revenue": 3340380.00, "soldNights": 347, "guests": 347, "adr": 9626.46, "revPar": 1919.75, "totalRooms": 58, "occupancy": 19.94, "extraServices": 132100.00, "extraBreakdown": { "parking": 58000, "hotTub": 32000, "pets": 18000, "earlyLate": 11100, "other": 13000 }, "retention": 28.5 },
-      "2026-07": { "revenue": 4579730.00, "soldNights": 428, "guests": 468, "adr": 10700.30, "revPar": 2547.12, "totalRooms": 58, "occupancy": 23.80, "extraServices": 219200.00, "extraBreakdown": { "parking": 90000, "hotTub": 54000, "pets": 29000, "earlyLate": 20000, "other": 26200 }, "retention": 34.2 }
+      "2025-07": { "revenue": 5024987.00, "soldNights": 728, "guests": 6356, "adr": 6902.45, "revPar": 2794.76, "totalRooms": 58, "occupancy": 40.48, "extraServices": 195000.00, "extraBreakdown": { "earlyLate": 90000, "pets": 55000, "parking": 28000, "linens": 12000, "water": 4000, "other": 6000 }, "retention": 31.0 },
+      "2025-08": { "revenue": 3854200.00, "soldNights": 379, "guests": 3951, "adr": 10169.39, "revPar": 2143.60, "totalRooms": 58, "occupancy": 21.07, "extraServices": 164000.00, "extraBreakdown": { "earlyLate": 78000, "pets": 45000, "parking": 22000, "linens": 10000, "water": 3000, "other": 6000 }, "retention": 29.4 },
+      "2025-09": { "revenue": 1048285.71, "soldNights": 126, "guests": 840, "adr": 8319.72, "revPar": 602.46, "totalRooms": 58, "occupancy": 7.24, "extraServices": 48000.00, "extraBreakdown": { "earlyLate": 22000, "pets": 14000, "parking": 6000, "linens": 3000, "water": 1000, "other": 2000 }, "retention": 22.0 },
+      "2025-10": { "revenue": 555989.29, "soldNights": 118, "guests": 312, "adr": 4711.77, "revPar": 309.22, "totalRooms": 58, "occupancy": 6.56, "extraServices": 31000.00, "extraBreakdown": { "earlyLate": 15000, "pets": 8000, "parking": 4000, "linens": 2000, "water": 1000, "other": 1000 }, "retention": 19.5 },
+      "2025-11": { "revenue": 410742.80, "soldNights": 94, "guests": 245, "adr": 4369.60, "revPar": 236.05, "totalRooms": 58, "occupancy": 5.40, "extraServices": 25000.00, "extraBreakdown": { "earlyLate": 12000, "pets": 7000, "parking": 3000, "linens": 1500, "water": 500, "other": 1000 }, "retention": 18.0 },
+      "2025-12": { "revenue": 272705.18, "soldNights": 65, "guests": 198, "adr": 4195.46, "revPar": 151.67, "totalRooms": 58, "occupancy": 3.61, "extraServices": 22000.00, "extraBreakdown": { "earlyLate": 10000, "pets": 6000, "parking": 3000, "linens": 1500, "water": 500, "other": 1000 }, "retention": 20.1 },
+      "2026-01": { "revenue": 372230.00, "soldNights": 65, "guests": 210, "adr": 5726.61, "revPar": 207.02, "totalRooms": 58, "occupancy": 3.61, "extraServices": 32000.00, "extraBreakdown": { "earlyLate": 15000, "pets": 9000, "parking": 4000, "linens": 2000, "water": 1000, "other": 1000 }, "retention": 24.0 },
+      "2026-02": { "revenue": 127410.00, "soldNights": 49, "guests": 154, "adr": 2600.20, "revPar": 78.45, "totalRooms": 58, "occupancy": 3.01, "extraServices": 18000.00, "extraBreakdown": { "earlyLate": 8000, "pets": 5000, "parking": 3000, "linens": 1000, "water": 500, "other": 500 }, "retention": 19.8 },
+      "2026-03": { "revenue": 226340.00, "soldNights": 63, "guests": 186, "adr": 3592.69, "revPar": 125.88, "totalRooms": 58, "occupancy": 3.50, "extraServices": 21000.00, "extraBreakdown": { "earlyLate": 10000, "pets": 6000, "parking": 3000, "linens": 1000, "water": 500, "other": 500 }, "retention": 21.0 },
+      "2026-04": { "revenue": 440030.00, "soldNights": 72, "guests": 215, "adr": 6111.52, "revPar": 252.89, "totalRooms": 58, "occupancy": 4.13, "extraServices": 29000.00, "extraBreakdown": { "earlyLate": 14000, "pets": 8000, "parking": 4000, "linens": 1500, "water": 500, "other": 1000 }, "retention": 22.5 },
+      "2026-05": { "revenue": 3328877.02, "soldNights": 285, "guests": 301, "adr": 11680.27, "revPar": 1851.43, "totalRooms": 58, "occupancy": 15.85, "extraServices": 100400.00, "extraBreakdown": { "earlyLate": 48000, "pets": 28000, "parking": 14000, "linens": 6000, "water": 2000, "other": 2400 }, "retention": 26.2 },
+      "2026-06": { 
+        "revenue": 3340380.00, 
+        "soldNights": 347, 
+        "guests": 347, 
+        "adr": 9626.46, 
+        "revPar": 1919.75, 
+        "totalRooms": 58, 
+        "occupancy": 19.94, 
+        "extraServices": 0.00, 
+        "extraBreakdown": { 
+          "earlyLate": 0, 
+          "pets": 0, 
+          "linens": 0, 
+          "parking": 0, 
+          "water": 0 
+        }, 
+        "retention": 28.5 
+      },
+      "2026-07": { "revenue": 4579730.00, "soldNights": 428, "guests": 468, "adr": 10700.30, "revPar": 2547.12, "totalRooms": 58, "occupancy": 23.80, "extraServices": 219200.00, "extraBreakdown": { "earlyLate": 105000, "pets": 62000, "parking": 28000, "linens": 12000, "water": 4000, "other": 8200 }, "retention": 34.2 }
     }
   }
 }
