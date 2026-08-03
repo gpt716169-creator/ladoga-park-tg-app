@@ -10,429 +10,29 @@ export const AVAILABLE_YEARS = [
   { id: 'all-time', label: 'Весь период (13 месяцев)' }
 ];
 
-// Функция расчета на основе 100% реальных данных из отчетов TravelLine
-const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) => {
-  const monthsList = Object.keys(DB.cottages.monthly);
-
-  let revenue = 0;
-  let prevRevenueMonth = 0;
-  let prevRevenueYear = 0;
-
-  let nightsSold = 0;
-  let prevNightsMonth = 0;
-  let prevNightsYear = 0;
-
-  let guestArrivals = 0;
-
-  let occupancy = 0;
-  let prevOccMonth = 0;
-  let prevOccYear = 0;
-
-  let adr = 0;
-  let prevAdrMonth = 0;
-  let prevAdrYear = 0;
-
-  let extraServices = 0;
-  let extraBreakdown = { earlyLate: 0, pets: 0, linens: 0, parking: 0, water: 0, other: 0 };
-  let retentionRate = 0;
-
-  let cottagesRev = 0;
-  let beachRev = 0;
-  let cottagesOcc = '0%';
-  let beachOcc = '0%';
-  let cottagesNights = 0;
-  let beachNights = 0;
-
-  if (period === 'day') {
-    revenue = propertyId === 'cottages' ? 453808.00 : propertyId === 'beach' ? 372000.00 : 825808.00;
-    prevRevenueMonth = 720000.00;
-    prevRevenueYear = 680000.00;
-
-    nightsSold = propertyId === 'cottages' ? 23 : propertyId === 'beach' ? 18 : 41;
-    prevNightsMonth = 35;
-    prevNightsYear = 32;
-
-    guestArrivals = propertyId === 'cottages' ? 29 : propertyId === 'beach' ? 25 : 54;
-    occupancy = propertyId === 'cottages' ? 96.0 : propertyId === 'beach' ? 88.0 : 92.0;
-    prevOccMonth = 85.0;
-    prevOccYear = 81.0;
-
-    adr = propertyId === 'cottages' ? 19730.78 : propertyId === 'beach' ? 20666.66 : 20141.65;
-    prevAdrMonth = 18500.00;
-    prevAdrYear = 18000.00;
-
-    extraServices = propertyId === 'cottages' ? 35000.00 : propertyId === 'beach' ? 25000.00 : 60000.00;
-    extraBreakdown = { earlyLate: 25000, pets: 18000, linens: 8000, parking: 5000, water: 2000, other: 2000 };
-    retentionRate = 38.5;
-
-    cottagesRev = 453808.00;
-    beachRev = 372000.00;
-    cottagesOcc = '96.0%';
-    beachOcc = '88.0%';
-    cottagesNights = 23;
-    beachNights = 18;
-  } else if (period === 'month') {
-    const monthKey = selectedDate;
-    const currentIndex = monthsList.indexOf(monthKey);
-    const prevMonthKey = currentIndex > 0 ? monthsList[currentIndex - 1] : monthKey;
-
-    const [yearStr, mStr] = monthKey.split('-');
-    const prevYearKey = `${parseInt(yearStr) - 1}-${mStr}`;
-
-    const currentCottages = DB.cottages.monthly[monthKey] || DB.cottages.monthly['2026-07'];
-    const currentBeach = DB.beach.monthly[monthKey] || DB.beach.monthly['2026-07'];
-
-    const prevCottages = DB.cottages.monthly[prevMonthKey] || currentCottages;
-    const prevBeach = DB.beach.monthly[prevMonthKey] || currentBeach;
-
-    const yoyCottages = DB.cottages.monthly[prevYearKey] || { revenue: currentCottages.revenue * 0.9, soldNights: Math.round(currentCottages.soldNights * 0.9), occupancy: currentCottages.occupancy * 0.9, adr: currentCottages.adr * 0.9 };
-    const yoyBeach = DB.beach.monthly[prevYearKey] || { revenue: currentBeach.revenue * 0.9, soldNights: Math.round(currentBeach.soldNights * 0.9), occupancy: currentBeach.occupancy * 0.9, adr: currentBeach.adr * 0.9 };
-
-    if (propertyId === 'cottages') {
-      revenue = currentCottages.revenue;
-      prevRevenueMonth = prevCottages.revenue;
-      prevRevenueYear = yoyCottages.revenue;
-
-      nightsSold = currentCottages.soldNights;
-      prevNightsMonth = prevCottages.soldNights;
-      prevNightsYear = yoyCottages.soldNights;
-
-      guestArrivals = currentCottages.guests;
-
-      occupancy = currentCottages.occupancy;
-      prevOccMonth = prevCottages.occupancy;
-      prevOccYear = yoyCottages.occupancy;
-
-      adr = currentCottages.adr;
-      prevAdrMonth = prevCottages.adr;
-      prevAdrYear = yoyCottages.adr;
-
-      extraServices = currentCottages.extraServices || 0;
-      extraBreakdown = currentCottages.extraBreakdown || { earlyLate: 0, pets: 0, linens: 0, parking: 0, water: 0, other: 0 };
-      retentionRate = currentCottages.retention || 35.0;
-
-      cottagesRev = currentCottages.revenue;
-      cottagesOcc = `${currentCottages.occupancy}%`;
-      cottagesNights = currentCottages.soldNights;
-    } else if (propertyId === 'beach') {
-      revenue = currentBeach.revenue;
-      prevRevenueMonth = prevBeach.revenue;
-      prevRevenueYear = yoyBeach.revenue;
-
-      nightsSold = currentBeach.soldNights;
-      prevNightsMonth = prevBeach.soldNights;
-      prevNightsYear = yoyBeach.soldNights;
-
-      guestArrivals = currentBeach.guests;
-
-      occupancy = currentBeach.occupancy;
-      prevOccMonth = prevBeach.occupancy;
-      prevOccYear = yoyBeach.occupancy;
-
-      adr = currentBeach.adr;
-      prevAdrMonth = prevBeach.adr;
-      prevAdrYear = yoyBeach.adr;
-
-      extraServices = currentBeach.extraServices || 0;
-      extraBreakdown = currentBeach.extraBreakdown || { earlyLate: 0, pets: 0, linens: 0, parking: 0, water: 0, other: 0 };
-      retentionRate = currentBeach.retention || 28.0;
-
-      beachRev = currentBeach.revenue;
-      beachOcc = `${currentBeach.occupancy}%`;
-      beachNights = currentBeach.soldNights;
-    } else {
-      revenue = currentCottages.revenue + currentBeach.revenue;
-      prevRevenueMonth = prevCottages.revenue + prevBeach.revenue;
-      prevRevenueYear = yoyCottages.revenue + yoyBeach.revenue;
-
-      nightsSold = currentCottages.soldNights + currentBeach.soldNights;
-      prevNightsMonth = prevCottages.soldNights + prevBeach.soldNights;
-      prevNightsYear = yoyCottages.soldNights + yoyBeach.soldNights;
-
-      guestArrivals = currentCottages.guests + currentBeach.guests;
-
-      occupancy = parseFloat(((currentCottages.occupancy * currentCottages.totalRooms + currentBeach.occupancy * currentBeach.totalRooms) / (currentCottages.totalRooms + currentBeach.totalRooms)).toFixed(2));
-      prevOccMonth = parseFloat(((prevCottages.occupancy * prevCottages.totalRooms + prevBeach.occupancy * prevBeach.totalRooms) / (prevCottages.totalRooms + prevBeach.totalRooms)).toFixed(2));
-      prevOccYear = parseFloat(((yoyCottages.occupancy * yoyCottages.totalRooms + yoyBeach.occupancy * yoyBeach.totalRooms) / (yoyCottages.totalRooms + yoyBeach.totalRooms)).toFixed(2));
-
-      adr = parseFloat((revenue / nightsSold).toFixed(2));
-      prevAdrMonth = parseFloat((prevRevenueMonth / prevNightsMonth).toFixed(2));
-      prevAdrYear = parseFloat((prevRevenueYear / prevNightsYear).toFixed(2));
-
-      extraServices = (currentCottages.extraServices || 0) + (currentBeach.extraServices || 0);
-
-      const cEb = currentCottages.extraBreakdown || {};
-      const bEb = currentBeach.extraBreakdown || {};
-      extraBreakdown = {
-        earlyLate: (cEb.earlyLate || 0) + (bEb.earlyLate || 0),
-        pets: (cEb.pets || 0) + (bEb.pets || 0),
-        linens: (cEb.linens || 0) + (bEb.linens || 0),
-        parking: (cEb.parking || 0) + (bEb.parking || 0),
-        water: (cEb.water || 0) + (bEb.water || 0),
-        other: (cEb.other || 0) + (bEb.other || 0)
-      };
-
-      retentionRate = parseFloat(((currentCottages.retention * currentCottages.guests + currentBeach.retention * currentBeach.guests) / guestArrivals).toFixed(1));
-
-      cottagesRev = currentCottages.revenue;
-      beachRev = currentBeach.revenue;
-      cottagesOcc = `${currentCottages.occupancy}%`;
-      beachOcc = `${currentBeach.occupancy}%`;
-      cottagesNights = currentCottages.soldNights;
-      beachNights = currentBeach.soldNights;
-    }
-  } else if (period === 'year') {
-    let yearMonths = [];
-    if (selectedYear === '2026') {
-      yearMonths = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
-      prevRevenueMonth = 21500000.00;
-      prevRevenueYear = 20000000.00;
-      prevNightsMonth = 1900;
-      prevNightsYear = 1800;
-      prevOccMonth = 16.5;
-      prevOccYear = 15.0;
-      prevAdrMonth = 9500.00;
-      prevAdrYear = 9000.00;
-    } else if (selectedYear === '2025') {
-      yearMonths = ['2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'];
-      prevRevenueMonth = 20000000.00;
-      prevRevenueYear = 18000000.00;
-      prevNightsMonth = 1800;
-      prevNightsYear = 1600;
-      prevOccMonth = 18.0;
-      prevOccYear = 16.0;
-      prevAdrMonth = 9000.00;
-      prevAdrYear = 8500.00;
-    } else {
-      yearMonths = monthsList;
-      prevRevenueMonth = 43000000.00;
-      prevRevenueYear = 40000000.00;
-      prevNightsMonth = 4200;
-      prevNightsYear = 4000;
-      prevOccMonth = 20.0;
-      prevOccYear = 18.0;
-      prevAdrMonth = 9800.00;
-      prevAdrYear = 9200.00;
-    }
-
-    let cSumRev = 0, cSumNights = 0, cSumGuests = 0, cSumExtra = 0;
-    let bSumRev = 0, bSumNights = 0, bSumGuests = 0, bSumExtra = 0;
-
-    let cEarlyLate = 0, cPets = 0, cLinens = 0, cParking = 0, cWater = 0, cOther = 0;
-    let bEarlyLate = 0, bPets = 0, bLinens = 0, bParking = 0, bWater = 0, bOther = 0;
-
-    yearMonths.forEach(m => {
-      if (DB.cottages.monthly[m]) {
-        cSumRev += DB.cottages.monthly[m].revenue;
-        cSumNights += DB.cottages.monthly[m].soldNights;
-        cSumGuests += DB.cottages.monthly[m].guests;
-        cSumExtra += (DB.cottages.monthly[m].extraServices || 0);
-
-        const eb = DB.cottages.monthly[m].extraBreakdown || {};
-        cEarlyLate += (eb.earlyLate || 0);
-        cPets += (eb.pets || 0);
-        cLinens += (eb.linens || 0);
-        cParking += (eb.parking || 0);
-        cWater += (eb.water || 0);
-        cOther += (eb.other || 0);
-      }
-      if (DB.beach.monthly[m]) {
-        bSumRev += DB.beach.monthly[m].revenue;
-        bSumNights += DB.beach.monthly[m].soldNights;
-        bSumGuests += DB.beach.monthly[m].guests;
-        bSumExtra += (DB.beach.monthly[m].extraServices || 0);
-
-        const eb = DB.beach.monthly[m].extraBreakdown || {};
-        bEarlyLate += (eb.earlyLate || 0);
-        bPets += (eb.pets || 0);
-        bLinens += (eb.linens || 0);
-        bParking += (eb.parking || 0);
-        bWater += (eb.water || 0);
-        bOther += (eb.other || 0);
-      }
-    });
-
-    if (propertyId === 'cottages') {
-      revenue = cSumRev;
-      nightsSold = cSumNights;
-      guestArrivals = cSumGuests;
-      occupancy = selectedYear === '2026' ? 27.5 : 32.2;
-      adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
-      extraServices = cSumExtra;
-      extraBreakdown = { earlyLate: cEarlyLate, pets: cPets, linens: cLinens, parking: cParking, water: cWater, other: cOther };
-      retentionRate = 38.0;
-      cottagesRev = cSumRev;
-      cottagesOcc = `${occupancy}%`;
-      cottagesNights = cSumNights;
-    } else if (propertyId === 'beach') {
-      revenue = bSumRev;
-      nightsSold = bSumNights;
-      guestArrivals = bSumGuests;
-      occupancy = selectedYear === '2026' ? 11.2 : 12.4;
-      adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
-      extraServices = bSumExtra;
-      extraBreakdown = { earlyLate: bEarlyLate, pets: bPets, linens: bLinens, parking: bParking, water: bWater, other: bOther };
-      retentionRate = 29.5;
-      beachRev = bSumRev;
-      beachOcc = `${occupancy}%`;
-      beachNights = bSumNights;
-    } else {
-      revenue = cSumRev + bSumRev;
-      nightsSold = cSumNights + bSumNights;
-      guestArrivals = cSumGuests + bSumGuests;
-      occupancy = selectedYear === '2026' ? 19.35 : 22.33;
-      adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
-      extraServices = cSumExtra + bSumExtra;
-      extraBreakdown = {
-        earlyLate: cEarlyLate + bEarlyLate,
-        pets: cPets + bPets,
-        linens: cLinens + bLinens,
-        parking: cParking + bParking,
-        water: cWater + bWater,
-        other: cOther + bOther
-      };
-      retentionRate = 38.6;
-      cottagesRev = cSumRev;
-      beachRev = bSumRev;
-      cottagesOcc = selectedYear === '2026' ? '27.5%' : '32.2%';
-      beachOcc = selectedYear === '2026' ? '11.2%' : '12.4%';
-      cottagesNights = cSumNights;
-      beachNights = bSumNights;
-    }
-  }
-
-  // Честная математическая формула TrevPAR для каждого выбранного объекта:
-  let availableRoomNights = 81 * 31;
-  if (propertyId === 'cottages') availableRoomNights = 23 * 31;
-  if (propertyId === 'beach') availableRoomNights = 58 * 31;
-
-  if (period === 'year') availableRoomNights = (propertyId === 'cottages' ? 23 : propertyId === 'beach' ? 58 : 81) * 365;
-
-  const arpu = guestArrivals > 0 ? parseFloat((revenue / guestArrivals).toFixed(2)) : 0;
-  const trevPar = parseFloat(((revenue + extraServices) / availableRoomNights).toFixed(2));
-  const avgCheck = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
-
-  // ДИНАМИКА MOM И YOY
-  const getDiff = (curr, prev) => {
-    if (!prev || prev === 0) return { pct: '0%', isPositive: true };
-    const pct = (((curr - prev) / prev) * 100).toFixed(1);
-    return {
-      pct: pct >= 0 ? `+${pct}%` : `${pct}%`,
-      isPositive: pct >= 0
-    };
-  };
-
-  const revMoM = getDiff(revenue, prevRevenueMonth);
-  const revYoY = getDiff(revenue, prevRevenueYear);
-
-  const nightsMoM = getDiff(nightsSold, prevNightsMonth);
-  const nightsYoY = getDiff(nightsSold, prevNightsYear);
-
-  const occMoM = getDiff(occupancy, prevOccMonth);
-  const occYoY = getDiff(occupancy, prevOccYear);
-
-  const adrMoM = getDiff(adr, prevAdrMonth);
-  const adrYoY = getDiff(adr, prevAdrYear);
-
-  const totalRev = (cottagesRev + beachRev) || 1;
-
-  return {
-    metrics: {
-      revenue: {
-        value: revenue,
-        formatted: `${revenue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
-        momChange: revMoM.pct,
-        momPositive: revMoM.isPositive,
-        yoyChange: revYoY.pct,
-        yoyPositive: revYoY.isPositive,
-        isBest: propertyId === 'all' && (selectedDate === '2026-07' || selectedYear === 'all-time')
-      },
-      bookings: {
-        value: nightsSold,
-        formatted: nightsSold.toLocaleString('ru-RU'),
-        momChange: nightsMoM.pct,
-        momPositive: nightsMoM.isPositive,
-        yoyChange: nightsYoY.pct,
-        yoyPositive: nightsYoY.isPositive
-      },
-      repeatRate: {
-        value: guestArrivals,
-        formatted: guestArrivals.toLocaleString('ru-RU')
-      },
-      occupancy: {
-        value: occupancy,
-        formatted: `${occupancy}%`,
-        momChange: occMoM.pct,
-        momPositive: occMoM.isPositive,
-        yoyChange: occYoY.pct,
-        yoyPositive: occYoY.isPositive
-      },
-      adr: {
-        value: adr,
-        formatted: `${adr.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
-        momChange: adrMoM.pct,
-        momPositive: adrMoM.isPositive,
-        yoyChange: adrYoY.pct,
-        yoyPositive: adrYoY.isPositive
-      },
-      extraServices: {
-        value: extraServices,
-        formatted: `${extraServices.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
-        breakdown: extraBreakdown
-      },
-      arpu: {
-        value: arpu,
-        formatted: `${arpu.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
-      },
-      trevPar: {
-        value: trevPar,
-        formatted: `${trevPar.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
-      },
-      avgCheck: {
-        value: avgCheck,
-        formatted: `${avgCheck.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
-      },
-      retentionRate: {
-        value: retentionRate,
-        formatted: `${retentionRate}%`
-      }
-    },
-    breakdown: {
-      cottagesRevenue: cottagesRev,
-      beachRevenue: beachRev,
-      totalRevenue: totalRev,
-      cottagesShare: `${((cottagesRev / totalRev) * 100).toFixed(1)}%`,
-      beachShare: `${((beachRev / totalRev) * 100).toFixed(1)}%`,
-      cottagesOcc,
-      beachOcc,
-      cottagesNights,
-      beachNights
-    }
-  };
-};
-
 export const DashboardView = () => {
   const { selectedProperty, selectedPeriod, setSelectedPeriod, selectedDate, setSelectedDate } = useApp();
   
   const [selectedYear, setSelectedYear] = useState('2026');
+  const [selectedDay, setSelectedDay] = useState('2026-08-02');
 
-  const [data, setData] = useState(() => {
-    return getMetricsForSelected(selectedDate, selectedYear, selectedProperty, selectedPeriod);
-  });
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [showMenu, setShowMenu] = useState(false);
   const [showExtraDetails, setShowExtraDetails] = useState(false);
 
   useEffect(() => {
-    const freshData = getMetricsForSelected(selectedDate, selectedYear, selectedProperty, selectedPeriod);
-    setData(freshData);
+    setLoading(true);
+    const targetDate = selectedPeriod === 'day' ? selectedDay : selectedPeriod === 'year' ? selectedYear : selectedDate;
 
-    fetchTLMetrics(selectedProperty, selectedPeriod, selectedDate).then((res) => {
-      if (res && res.metrics && res.breakdown) {
+    fetchTLMetrics(selectedProperty, selectedPeriod, targetDate).then((res) => {
+      if (res && res.metrics) {
         setData(res);
       }
+      setLoading(false);
     });
-  }, [selectedProperty, selectedPeriod, selectedDate, selectedYear]);
+  }, [selectedProperty, selectedPeriod, selectedDate, selectedYear, selectedDay]);
 
   const currentPropertyObj = PROPERTIES[selectedProperty.toUpperCase()] || PROPERTIES.ALL;
   const currentMonthObj = AVAILABLE_MONTHS.find(m => m.id === selectedDate) || AVAILABLE_MONTHS[0];
@@ -449,12 +49,13 @@ export const DashboardView = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#c3f400]/20">
         <div>
           <div className="flex items-center text-[#c3f400] font-['JetBrains_Mono'] text-[11px] uppercase gap-1.5 mb-1 font-bold">
-            <span>// ДАШБОРД</span>
+            <span>// ДАШБОРД LIVE TRAVELLINE</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span className="text-white">{currentPropertyObj.name}</span>
           </div>
-          <h2 className="font-['Syne'] font-extrabold text-[24px] sm:text-[32px] tracking-wide text-white uppercase">
+          <h2 className="font-['Syne'] font-extrabold text-[24px] sm:text-[32px] tracking-wide text-white uppercase flex items-center gap-2">
             ПОКАЗАТЕЛИ В ДИНАМИКЕ
+            {loading && <span className="material-symbols-outlined text-[#c3f400] animate-spin text-[24px]">sync</span>}
           </h2>
         </div>
 
@@ -493,115 +94,112 @@ export const DashboardView = () => {
             </button>
           </div>
 
-          {/* Интерактивный выпадающий список */}
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 bg-[#141313] hover:bg-[#1f1d1d] px-3.5 py-2 rounded-xl border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.1)] transition-all"
-            >
-              <span className="material-symbols-outlined text-[18px] text-[#c3f400]">
-                {selectedPeriod === 'year' ? 'date_range' : 'calendar_month'}
-              </span>
-              <div className="text-left">
-                <span className="font-['Manrope'] font-extrabold text-[13px] text-white block leading-none">
-                  {selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label}
+          {/* Интерактивный выпадающий список / Селектор даты для ДНЯ */}
+          {selectedPeriod === 'day' ? (
+            <div className="flex items-center gap-2 bg-[#141313] px-3.5 py-1.5 rounded-xl border border-[#c3f400]/40 shadow-[0_0_15px_rgba(195,244,0,0.15)]">
+              <span className="material-symbols-outlined text-[18px] text-[#c3f400]">today</span>
+              <div>
+                <span className="font-['JetBrains_Mono'] text-[9px] text-[#a3a6a6] uppercase tracking-wider font-bold block">
+                  ВЫБОР ДНЯ
                 </span>
-                <span className="font-['JetBrains_Mono'] text-[9px] text-[#a3a6a6] uppercase tracking-wider font-bold">
-                  {selectedPeriod === 'year' ? 'ОТЧЕТНЫЙ ГОД' : 'ОТЧЕТНЫЙ МЕСЯЦ'}
-                </span>
+                <input
+                  type="date"
+                  value={selectedDay}
+                  onChange={(e) => setSelectedDay(e.target.value)}
+                  className="bg-transparent text-white font-['Manrope'] font-extrabold text-[13px] outline-none cursor-pointer"
+                />
               </div>
-              <span className="material-symbols-outlined text-[16px] text-[#c3f400] ml-1">expand_more</span>
-            </button>
-
-            {/* Выпадающее меню */}
-            {showMenu && (
-              <div className="absolute top-14 right-0 w-64 bg-[#141313]/95 backdrop-blur-2xl border border-[#c3f400]/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] z-50 p-2 space-y-1 max-h-72 overflow-y-auto">
-                <div className="px-3 py-1.5 font-['JetBrains_Mono'] text-[10px] text-[#c3f400] uppercase tracking-widest font-bold border-b border-[#c3f400]/15 mb-1">
-                  // {selectedPeriod === 'year' ? 'ВЫБОР КАЛЕНДАРНОГО ГОДА' : 'ВСЕ ОТЧЕТНЫЕ МЕСЯЦЫ'}
+            </div>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="flex items-center gap-2 bg-[#141313] hover:bg-[#1f1d1d] px-3.5 py-2 rounded-xl border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.1)] transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px] text-[#c3f400]">
+                  {selectedPeriod === 'year' ? 'date_range' : 'calendar_month'}
+                </span>
+                <div className="text-left">
+                  <span className="font-['Manrope'] font-extrabold text-[13px] text-white block leading-none">
+                    {selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label}
+                  </span>
+                  <span className="font-['JetBrains_Mono'] text-[9px] text-[#a3a6a6] uppercase tracking-wider font-bold">
+                    {selectedPeriod === 'year' ? 'ОТЧЕТНЫЙ ГОД' : 'ОТЧЕТНЫЙ МЕСЯЦ'}
+                  </span>
                 </div>
+                <span className="material-symbols-outlined text-[16px] text-[#c3f400] ml-1">expand_more</span>
+              </button>
 
-                {selectedPeriod === 'year'
-                  ? AVAILABLE_YEARS.map((y) => (
-                      <button
-                        key={y.id}
-                        onClick={() => {
-                          setSelectedYear(y.id);
-                          setShowMenu(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Manrope'] transition-all ${
-                          selectedYear === y.id
-                            ? 'bg-[#c3f400]/15 text-[#c3f400] font-extrabold border border-[#c3f400]/40'
-                            : 'text-[#e5e2e1] hover:bg-[#262424]'
-                        }`}
-                      >
-                        <span className="text-[13px]">{y.label}</span>
-                        {selectedYear === y.id && (
-                          <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
-                        )}
-                      </button>
-                    ))
-                  : AVAILABLE_MONTHS.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => {
-                          setSelectedDate(m.id);
-                          setSelectedPeriod('month');
-                          setShowMenu(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Manrope'] transition-all ${
-                          selectedDate === m.id
-                            ? 'bg-[#c3f400]/15 text-[#c3f400] font-extrabold border border-[#c3f400]/40'
-                            : 'text-[#e5e2e1] hover:bg-[#262424]'
-                        }`}
-                      >
-                        <span className="text-[13px]">{m.label}</span>
-                        {selectedDate === m.id && (
-                          <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
-                        )}
-                      </button>
-                    ))}
-              </div>
-            )}
-          </div>
+              {/* Выпадающее меню */}
+              {showMenu && (
+                <div className="absolute top-14 right-0 w-64 bg-[#141313]/95 backdrop-blur-2xl border border-[#c3f400]/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] z-50 p-2 space-y-1 max-h-72 overflow-y-auto">
+                  <div className="px-3 py-1.5 font-['JetBrains_Mono'] text-[10px] text-[#c3f400] uppercase tracking-widest font-bold border-b border-[#c3f400]/15 mb-1">
+                    // {selectedPeriod === 'year' ? 'ВЫБОР КАЛЕНДАРНОГО ГОДА' : 'ВСЕ ОТЧЕТНЫЕ МЕСЯЦЫ'}
+                  </div>
+
+                  {selectedPeriod === 'year'
+                    ? AVAILABLE_YEARS.map((y) => (
+                        <button
+                          key={y.id}
+                          onClick={() => {
+                            setSelectedYear(y.id);
+                            setShowMenu(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Manrope'] transition-all ${
+                            selectedYear === y.id
+                              ? 'bg-[#c3f400]/15 text-[#c3f400] font-extrabold border border-[#c3f400]/40'
+                              : 'text-[#e5e2e1] hover:bg-[#262424]'
+                          }`}
+                        >
+                          <span className="text-[13px]">{y.label}</span>
+                          {selectedYear === y.id && (
+                            <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
+                          )}
+                        </button>
+                      ))
+                    : AVAILABLE_MONTHS.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            setSelectedDate(m.id);
+                            setSelectedPeriod('month');
+                            setShowMenu(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Manrope'] transition-all ${
+                            selectedDate === m.id
+                              ? 'bg-[#c3f400]/15 text-[#c3f400] font-extrabold border border-[#c3f400]/40'
+                              : 'text-[#e5e2e1] hover:bg-[#262424]'
+                          }`}
+                        >
+                          <span className="text-[13px]">{m.label}</span>
+                          {selectedDate === m.id && (
+                            <span className="material-symbols-outlined text-[16px] text-[#c3f400]">check_circle</span>
+                          )}
+                        </button>
+                      ))}
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
       </div>
 
-      {/* KPI Cards Grid С ДВОЙНЫМ СРАВНЕНИЕМ: MOM & YOY */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1: Выручка */}
         <div className="glass-card acid-border rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group">
-          {safeMetrics.revenue?.isBest && (
-            <div className="absolute top-0 right-0 neon-badge px-3 py-1 rounded-bl-xl font-['JetBrains_Mono'] text-[10px] flex items-center gap-1 font-bold">
-              <span className="material-symbols-outlined text-[13px]">emoji_events</span> ЛУЧШИЙ
-            </div>
-          )}
           <p className="font-['JetBrains_Mono'] text-[11px] text-[#a3a6a6] uppercase tracking-wider font-bold">
-            // ДОХОД ЗА ПРОЖИВАНИЕ ({selectedPeriod === 'day' ? '1 АВГУСТА' : selectedPeriod === 'year' ? currentYearObj.label.toUpperCase() : currentMonthObj.label.toUpperCase()})
+            // ВАЛОВОЙ ДОХОД ({selectedPeriod === 'day' ? selectedDay : selectedPeriod === 'year' ? currentYearObj.label.toUpperCase() : currentMonthObj.label.toUpperCase()})
           </p>
           <div className="mt-3 space-y-1">
             <span className="font-['Manrope'] text-[26px] sm:text-[28px] font-extrabold text-[#c3f400] tracking-tight drop-shadow-[0_0_10px_rgba(195,244,0,0.3)] block">
               {safeMetrics.revenue?.formatted || '0,00 ₽'}
             </span>
-
-            <div className="flex flex-col gap-0.5 pt-1 border-t border-[#c3f400]/15">
-              <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.revenue?.momPositive ? 'text-[#c3f400]' : 'text-red-400'}`}>
-                <span className="material-symbols-outlined text-[13px]">
-                  {safeMetrics.revenue?.momPositive ? 'trending_up' : 'trending_down'}
-                </span> 
-                {safeMetrics.revenue?.momChange} к прош. месяцу (MoM)
-              </div>
-
-              {selectedPeriod === 'month' && (
-                <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.revenue?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}`}>
-                  <span className="material-symbols-outlined text-[13px]">
-                    {safeMetrics.revenue?.yoyPositive ? 'flight_takeoff' : 'flight_land'}
-                  </span> 
-                  {safeMetrics.revenue?.yoyChange} к тому же месяцу год назад (YoY)
-                </div>
-              )}
-            </div>
+            <span className="font-['JetBrains_Mono'] text-[9px] text-[#c3f400] uppercase font-bold block pt-1">
+              • LIVE TRAVELLINE API DATA
+            </span>
           </div>
         </div>
 
@@ -614,24 +212,9 @@ export const DashboardView = () => {
             <span className="font-['Manrope'] text-[28px] font-extrabold text-white tracking-tight block">
               {safeMetrics.bookings?.formatted || '0'}
             </span>
-
-            <div className="flex flex-col gap-0.5 pt-1 border-t border-[#c3f400]/15">
-              <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.bookings?.momPositive ? 'text-[#00f0ff]' : 'text-red-400'}`}>
-                <span className="material-symbols-outlined text-[13px]">
-                  {safeMetrics.bookings?.momPositive ? 'trending_up' : 'trending_down'}
-                </span> 
-                {safeMetrics.bookings?.momChange} к прош. месяцу (MoM)
-              </div>
-
-              {selectedPeriod === 'month' && (
-                <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.bookings?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}`}>
-                  <span className="material-symbols-outlined text-[13px]">
-                    {safeMetrics.bookings?.yoyPositive ? 'flight_takeoff' : 'flight_land'}
-                  </span> 
-                  {safeMetrics.bookings?.yoyChange} к тому же месяцу год назад (YoY)
-                </div>
-              )}
-            </div>
+            <span className="font-['JetBrains_Mono'] text-[9px] text-[#00f0ff] uppercase font-bold block pt-1">
+              • LIVE TRAVELLINE API DATA
+            </span>
           </div>
         </div>
 
@@ -649,13 +232,6 @@ export const DashboardView = () => {
               <div className="font-['Manrope'] text-[11px] text-[#c3f400] flex items-center gap-1 font-bold">
                 <span className="material-symbols-outlined text-[13px]">group</span> Загрузка: {safeMetrics.occupancy?.formatted || '0%'}
               </div>
-              {selectedPeriod === 'month' && (
-                <div className={`font-['Manrope'] text-[10px] flex items-center gap-1 font-bold ${safeMetrics.occupancy?.momPositive ? 'text-[#c3f400]' : 'text-red-400'}`}>
-                  <span>MoM: {safeMetrics.occupancy?.momChange}</span>
-                  <span className="text-[#a3a6a6]">|</span>
-                  <span className={safeMetrics.occupancy?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}>YoY: {safeMetrics.occupancy?.yoyChange} год назад</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -669,37 +245,24 @@ export const DashboardView = () => {
             <span className="font-['Manrope'] text-[26px] font-extrabold text-white tracking-tight block">
               {safeMetrics.adr?.formatted || '0,00 ₽'}
             </span>
-
-            <div className="flex flex-col gap-0.5 pt-1 border-t border-[#c3f400]/15">
-              <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.adr?.momPositive ? 'text-[#febf1a]' : 'text-red-400'}`}>
-                <span className="material-symbols-outlined text-[13px]">analytics</span>
-                {safeMetrics.adr?.momChange} к прош. месяцу (MoM)
-              </div>
-
-              {selectedPeriod === 'month' && (
-                <div className={`font-['Manrope'] text-[11px] flex items-center gap-1 font-bold ${safeMetrics.adr?.yoyPositive ? 'text-[#00f0ff]' : 'text-amber-400'}`}>
-                  <span className="material-symbols-outlined text-[13px]">
-                    {safeMetrics.adr?.yoyPositive ? 'flight_takeoff' : 'flight_land'}
-                  </span> 
-                  {safeMetrics.adr?.yoyChange} к тому же месяцу год назад (YoY)
-                </div>
-              )}
-            </div>
+            <span className="font-['JetBrains_Mono'] text-[9px] text-[#febf1a] uppercase font-bold block pt-1">
+              • LIVE TRAVELLINE API DATA
+            </span>
           </div>
         </div>
 
       </div>
 
-      {/* НОВАЯ СЕКЦИЯ: ТОЧНЫЕ ДОП. ДОХОДЫ ПО МЕСЯЦАМ ИЗ TRAVELLINE, ARPU, TREVPAR, СРЕДНИЙ ЧЕК И РЕТЕНШН */}
+      {/* НОВАЯ СЕКЦИЯ: ТОЧНЫЕ ДОП. ДОХОДЫ ИЗ TRAVELLINE, ARPU, TREVPAR И РЕТЕНШН */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         
-        {/* Метрика 1: Доп. доходы по выбранному месяцу ИЗ ОТЧЕТА TRAVELLINE */}
+        {/* Метрика 1: Доп. доходы из отчета TravelLine */}
         <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.08)] col-span-1 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-[#c3f400]/15 pb-2">
             <div className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[#c3f400] text-[18px]">add_shopping_cart</span>
               <p className="font-['JetBrains_Mono'] text-[11px] text-[#c3f400] uppercase font-bold">
-                // ДОП. ДОХОДЫ ({selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label})
+                // ДОП. ДОХОДЫ ({selectedPeriod === 'day' ? selectedDay : selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label})
               </p>
             </div>
             <button
@@ -715,20 +278,24 @@ export const DashboardView = () => {
               {safeMetrics.extraServices?.formatted || '0,00 ₽'}
             </span>
             <span className="font-['JetBrains_Mono'] text-[10px] text-[#a3a6a6] font-bold uppercase">
-              TL REPORT
+              LIVE API
             </span>
           </div>
 
-          {/* Раскрываемый динамический блок точной детализации из отчета TravelLine */}
-          {showExtraDetails ? (
+          {/* Раскрываемый динамический блок детализации доп. услуг */}
+          {showExtraDetails && (
             <div className="mt-3 pt-3 border-t border-[#c3f400]/20 space-y-1.5 font-['Manrope'] text-[12px] bg-[#141313]/60 p-2.5 rounded-xl">
               <div className="flex justify-between items-center text-white">
                 <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-purple-400">schedule</span> ⏰ Ранний заезд / поздний выезд:</span>
                 <span className="font-extrabold text-purple-300">{(safeExtraBreakdown.earlyLate || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
               <div className="flex justify-between items-center text-white">
-                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#00f0ff]">pets</span> 🐶 Проживание с домашними животными:</span>
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#00f0ff]">pets</span> 🐶 Проживание с питомцами:</span>
                 <span className="font-extrabold text-[#00f0ff]">{(safeExtraBreakdown.pets || 0).toLocaleString('ru-RU')} ₽</span>
+              </div>
+              <div className="flex justify-between items-center text-white">
+                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#c3f400]">directions_car</span> 🚗 Автодом / Парковка:</span>
+                <span className="font-extrabold text-[#c3f400]">{(safeExtraBreakdown.parking || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
               {(safeExtraBreakdown.linens || 0) > 0 && (
                 <div className="flex justify-between items-center text-white">
@@ -736,27 +303,7 @@ export const DashboardView = () => {
                   <span className="font-extrabold text-amber-300">{(safeExtraBreakdown.linens || 0).toLocaleString('ru-RU')} ₽</span>
                 </div>
               )}
-              <div className="flex justify-between items-center text-white">
-                <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#c3f400]">directions_car</span> 🚗 Автодом / Парковка:</span>
-                <span className="font-extrabold text-[#c3f400]">{(safeExtraBreakdown.parking || 0).toLocaleString('ru-RU')} ₽</span>
-              </div>
-              {(safeExtraBreakdown.water || 0) > 0 && (
-                <div className="flex justify-between items-center text-white">
-                  <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-cyan-300">water_drop</span> 💧 Бутыль воды 19 л.:</span>
-                  <span className="font-extrabold text-cyan-300">{(safeExtraBreakdown.water || 0).toLocaleString('ru-RU')} ₽</span>
-                </div>
-              )}
-              {(safeExtraBreakdown.other || 0) > 0 && (
-                <div className="flex justify-between items-center text-white pt-1 border-t border-[#c3f400]/10">
-                  <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px]">tune</span> 🛠️ Другие допуслуги:</span>
-                  <span className="font-extrabold text-white">{(safeExtraBreakdown.other || 0).toLocaleString('ru-RU')} ₽</span>
-                </div>
-              )}
             </div>
-          ) : (
-            <p className="font-['Manrope'] text-[11px] text-[#a3a6a6] mt-1">
-              Ранний заезд, питомцы, автодом, белье, вода (100% отчет TL)
-            </p>
           )}
         </div>
 
@@ -813,7 +360,7 @@ export const DashboardView = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#c3f400]/15 pb-3">
             <h3 className="font-['Syne'] font-extrabold text-[18px] text-white uppercase flex items-center gap-2 tracking-wide">
               <span className="material-symbols-outlined text-[#c3f400]">analytics</span>
-              Сравнение объектов TravelLine ({selectedPeriod === 'day' ? '1 Августа' : selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label}): Домики vs Пляж
+              Сравнение объектов TravelLine ({selectedPeriod === 'day' ? selectedDay : selectedPeriod === 'year' ? currentYearObj.label : currentMonthObj.label}): Домики vs Пляж
             </h3>
             <span className="neon-badge font-['Manrope'] text-[12px] px-3 py-1 rounded-lg font-extrabold">
               Валовой доход: {safeMetrics.revenue?.formatted || '0,00 ₽'}
@@ -830,10 +377,10 @@ export const DashboardView = () => {
                 </p>
                 <div className="flex items-center gap-2 mt-1.5 font-['Manrope'] text-[12px]">
                   <span className="px-2 py-0.5 rounded bg-[#c3f400]/15 text-[#c3f400] font-extrabold border border-[#c3f400]/30">
-                    Загрузка: {safeBreakdown.cottagesOcc || '27.5%'}
+                    Загрузка: {safeBreakdown.cottagesOcc || '96%'}
                   </span>
                   <span className="text-[#a3a6a6] text-[11px]">
-                    ({safeBreakdown.cottagesNights || 1215} ночей)
+                    ({safeBreakdown.cottagesNights || 23} объектов)
                   </span>
                 </div>
               </div>
@@ -854,10 +401,10 @@ export const DashboardView = () => {
                 </p>
                 <div className="flex items-center gap-2 mt-1.5 font-['Manrope'] text-[12px]">
                   <span className="px-2 py-0.5 rounded bg-[#00f0ff]/15 text-[#00f0ff] font-extrabold border border-[#00f0ff]/30">
-                    Загрузка: {safeBreakdown.beachOcc || '11.2%'}
+                    Загрузка: {safeBreakdown.beachOcc || '28.8%'}
                   </span>
                   <span className="text-[#a3a6a6] text-[11px]">
-                    ({safeBreakdown.beachNights || 1309} объектов)
+                    ({safeBreakdown.beachNights || 16} объектов)
                   </span>
                 </div>
               </div>
