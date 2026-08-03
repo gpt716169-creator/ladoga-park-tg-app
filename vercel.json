@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/travelline/(.*)", "destination": "/api/travelline" },
-    { "source": "/api/travelline", "destination": "/api/travelline" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
+    }
   ]
 }
