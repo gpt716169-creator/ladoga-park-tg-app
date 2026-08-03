@@ -1,5 +1,4 @@
-import fs from 'fs';
-import path from 'path';
+import DB from '../database.json' assert { type: 'json' };
 
 // Ключи API TravelLine по умолчанию
 const CREDENTIALS = {
@@ -69,7 +68,6 @@ async function fetchTLDailyOccupancy(propertyKey, dateStr) {
 }
 
 export default async function handler(req, res) {
-  // Настройка CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -79,16 +77,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { property = 'all', period = 'month', date = '2026-07' } = req.query;
+  const { property = 'all', period = 'month', date = '2026-07' } = req.query || {};
 
   try {
-    // Чтение базы данных
-    const dbPath = path.join(process.cwd(), 'database.json');
-    let DB = { cottages: { monthly: {} }, beach: { monthly: {} } };
-    if (fs.existsSync(dbPath)) {
-      DB = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-    }
-
     let revenue = 0;
     let nightsSold = 0;
     let guestArrivals = 0;
@@ -106,7 +97,7 @@ export default async function handler(req, res) {
     let beachNights = 0;
 
     if (period === 'day') {
-      const dateStr = date.length === 10 ? date : '2026-08-02';
+      const dateStr = date && date.length === 10 ? date : '2026-08-02';
 
       const liveBeach = await fetchTLDailyOccupancy('beach', dateStr);
       const liveCottages = await fetchTLDailyOccupancy('cottages', dateStr);
@@ -173,9 +164,9 @@ export default async function handler(req, res) {
       cottagesOcc = `${cottagesNights}/23`;
       beachOcc = `${beachNights}/59`;
     } else if (period === 'month') {
-      const monthKey = date.length === 7 ? date : '2026-07';
-      const cM = DB.cottages.monthly[monthKey] || DB.cottages.monthly['2026-07'] || {};
-      const bM = DB.beach.monthly[monthKey] || DB.beach.monthly['2026-07'] || {};
+      const monthKey = date && date.length === 7 ? date : '2026-07';
+      const cM = DB?.cottages?.monthly?.[monthKey] || DB?.cottages?.monthly?.['2026-07'] || {};
+      const bM = DB?.beach?.monthly?.[monthKey] || DB?.beach?.monthly?.['2026-07'] || {};
 
       if (property === 'cottages') {
         revenue = cM.revenue || 0;
@@ -224,7 +215,7 @@ export default async function handler(req, res) {
       beachNights = bM.soldNights || 0;
     } else if (period === 'year') {
       const yearSelected = date || '2026';
-      const monthsList = Object.keys(DB.cottages.monthly);
+      const monthsList = Object.keys(DB?.cottages?.monthly || {});
 
       let yearMonths = [];
       if (yearSelected === '2026') {
@@ -242,13 +233,14 @@ export default async function handler(req, res) {
       let bEarlyLate = 0, bPets = 0, bLinens = 0, bParking = 0, bWater = 0, bOther = 0;
 
       yearMonths.forEach(m => {
-        if (DB.cottages.monthly[m]) {
-          cSumRev += DB.cottages.monthly[m].revenue;
-          cSumNights += DB.cottages.monthly[m].soldNights;
-          cSumGuests += DB.cottages.monthly[m].guests;
-          cSumExtra += (DB.cottages.monthly[m].extraServices || 0);
+        if (DB?.cottages?.monthly?.[m]) {
+          const item = DB.cottages.monthly[m];
+          cSumRev += item.revenue || 0;
+          cSumNights += item.soldNights || 0;
+          cSumGuests += item.guests || 0;
+          cSumExtra += (item.extraServices || 0);
 
-          const eb = DB.cottages.monthly[m].extraBreakdown || {};
+          const eb = item.extraBreakdown || {};
           cEarlyLate += (eb.earlyLate || 0);
           cPets += (eb.pets || 0);
           cLinens += (eb.linens || 0);
@@ -256,13 +248,14 @@ export default async function handler(req, res) {
           cWater += (eb.water || 0);
           cOther += (eb.other || 0);
         }
-        if (DB.beach.monthly[m]) {
-          bSumRev += DB.beach.monthly[m].revenue;
-          bSumNights += DB.beach.monthly[m].soldNights;
-          bSumGuests += DB.beach.monthly[m].guests;
-          bSumExtra += (DB.beach.monthly[m].extraServices || 0);
+        if (DB?.beach?.monthly?.[m]) {
+          const item = DB.beach.monthly[m];
+          bSumRev += item.revenue || 0;
+          bSumNights += item.soldNights || 0;
+          bSumGuests += item.guests || 0;
+          bSumExtra += (item.extraServices || 0);
 
-          const eb = DB.beach.monthly[m].extraBreakdown || {};
+          const eb = item.extraBreakdown || {};
           bEarlyLate += (eb.earlyLate || 0);
           bPets += (eb.pets || 0);
           bLinens += (eb.linens || 0);
