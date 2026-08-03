@@ -174,63 +174,6 @@ export const FinancesView = () => {
 
           </div>
 
-          {/* Таблица последних проведенных оплат из реестра */}
-          <div className="space-y-3 pt-2">
-            <h4 className="font-['Syne'] font-bold text-[15px] text-white uppercase flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#c3f400] text-[18px]">receipt_long</span>
-              Реестр проверенных оплат (TravelLine Detailed Payments)
-            </h4>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left font-['Manrope'] text-[13px]">
-                <thead>
-                  <tr className="border-b border-[#c3f400]/20 font-['JetBrains_Mono'] text-[10px] text-[#a3a6a6] uppercase">
-                    <th className="py-2.5 px-3">НОМЕР БРОНИРАНИЯ</th>
-                    <th className="py-2.5 px-3">ОНЛАЙН (САЙТ)</th>
-                    <th className="py-2.5 px-3">ТЕРМИНАЛ</th>
-                    <th className="py-2.5 px-3">НАЛИЧНЫЕ</th>
-                    <th className="py-2.5 px-3">ВСЕГО ОПЛАЧЕНО</th>
-                    <th className="py-2.5 px-3">СТАТУС</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  <tr>
-                    <td className="py-3 px-3 font-['JetBrains_Mono'] text-[#c3f400] font-bold">20260702-52159-444538321</td>
-                    <td className="py-3 px-3 text-white font-semibold">15 661,45 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 font-extrabold text-[#c3f400]">15 661,45 ₽</td>
-                    <td className="py-3 px-3"><span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-bold border border-green-500/30">Проведен (100%)</span></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-3 font-['JetBrains_Mono'] text-[#c3f400] font-bold">20260701-54511-446836660</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 text-white font-semibold">10 700,30 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 font-extrabold text-[#00f0ff]">10 700,30 ₽</td>
-                    <td className="py-3 px-3"><span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-bold border border-green-500/30">Проведен (100%)</span></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-3 font-['JetBrains_Mono'] text-[#c3f400] font-bold">20260630-52159-445899916</td>
-                    <td className="py-3 px-3 text-white font-semibold">28 380,00 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 font-extrabold text-[#c3f400]">28 380,00 ₽</td>
-                    <td className="py-3 px-3"><span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-bold border border-green-500/30">Проведен (100%)</span></td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-3 font-['JetBrains_Mono'] text-[#c3f400] font-bold">20260629-52159-443238580</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 text-[#a3a6a6]">0,00 ₽</td>
-                    <td className="py-3 px-3 text-white font-semibold">14 200,00 ₽</td>
-                    <td className="py-3 px-3 font-extrabold text-[#febf1a]">14 200,00 ₽</td>
-                    <td className="py-3 px-3"><span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-bold border border-green-500/30">Проведен (100%)</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
       )}
     </div>
