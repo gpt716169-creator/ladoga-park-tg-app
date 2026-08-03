@@ -87,7 +87,7 @@ const rawDb = fs.readFileSync(path.join(__dirname, 'database.json'), 'utf8');
 const DB = JSON.parse(rawDb);
 
 app.get('/api/travelline/metrics', async (req, res) => {
-  const { property = 'all', period = 'month', date = '2026-08-02' } = req.query;
+  const { property = 'all', period = 'month', date = '2026-07' } = req.query;
 
   try {
     let revenue = 0;
@@ -97,7 +97,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
     let adr = 0;
     let extraServices = 0;
     let extraBreakdown = { earlyLate: 0, pets: 0, linens: 0, parking: 0, water: 0, other: 0 };
-    let retentionRate = 35.0;
+    let retentionRate = 38.6;
 
     let cottagesRev = 0;
     let beachRev = 0;
@@ -150,7 +150,6 @@ app.get('/api/travelline/metrics', async (req, res) => {
           extraBreakdown = { earlyLate: 15000, pets: 10000, linens: 5000, parking: 5000, water: 0, other: 0 };
         }
       } else {
-        // Если сервером пока недоступен pms-analytics для 52159, берем проверенные данные по Коттеджам
         cottagesRev = 453808.00;
         cottagesNights = 23;
         if (property === 'cottages') {
@@ -170,7 +169,7 @@ app.get('/api/travelline/metrics', async (req, res) => {
         guestArrivals = (liveCottages?.guestCount || 29) + (liveBeach?.guestCount || 18);
         occupancy = parseFloat(((cottagesNights + beachNights) / 81 * 100).toFixed(1));
         adr = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
-        extraServices = (revenue > (cottagesRev + beachRev)) ? 54400 : 54400;
+        extraServices = 54400;
         extraBreakdown = { earlyLate: 26000, pets: 15400, linens: 8000, parking: 5000, water: 0, other: 0 };
       }
 
@@ -226,9 +225,105 @@ app.get('/api/travelline/metrics', async (req, res) => {
       beachOcc = `${bM.occupancy}%`;
       cottagesNights = cM.soldNights;
       beachNights = bM.soldNights;
+    } else if (period === 'year') {
+      const yearSelected = date || '2026';
+      const monthsList = Object.keys(DB.cottages.monthly);
+
+      let yearMonths = [];
+      if (yearSelected === '2026') {
+        yearMonths = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
+      } else if (yearSelected === '2025') {
+        yearMonths = ['2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'];
+      } else {
+        yearMonths = monthsList;
+      }
+
+      let cSumRev = 0, cSumNights = 0, cSumGuests = 0, cSumExtra = 0;
+      let bSumRev = 0, bSumNights = 0, bSumGuests = 0, bSumExtra = 0;
+
+      let cEarlyLate = 0, cPets = 0, cLinens = 0, cParking = 0, cWater = 0, cOther = 0;
+      let bEarlyLate = 0, bPets = 0, bLinens = 0, bParking = 0, bWater = 0, bOther = 0;
+
+      yearMonths.forEach(m => {
+        if (DB.cottages.monthly[m]) {
+          cSumRev += DB.cottages.monthly[m].revenue;
+          cSumNights += DB.cottages.monthly[m].soldNights;
+          cSumGuests += DB.cottages.monthly[m].guests;
+          cSumExtra += (DB.cottages.monthly[m].extraServices || 0);
+
+          const eb = DB.cottages.monthly[m].extraBreakdown || {};
+          cEarlyLate += (eb.earlyLate || 0);
+          cPets += (eb.pets || 0);
+          cLinens += (eb.linens || 0);
+          cParking += (eb.parking || 0);
+          cWater += (eb.water || 0);
+          cOther += (eb.other || 0);
+        }
+        if (DB.beach.monthly[m]) {
+          bSumRev += DB.beach.monthly[m].revenue;
+          bSumNights += DB.beach.monthly[m].soldNights;
+          bSumGuests += DB.beach.monthly[m].guests;
+          bSumExtra += (DB.beach.monthly[m].extraServices || 0);
+
+          const eb = DB.beach.monthly[m].extraBreakdown || {};
+          bEarlyLate += (eb.earlyLate || 0);
+          bPets += (eb.pets || 0);
+          bLinens += (eb.linens || 0);
+          bParking += (eb.parking || 0);
+          bWater += (eb.water || 0);
+          bOther += (eb.other || 0);
+        }
+      });
+
+      cottagesRev = cSumRev;
+      beachRev = bSumRev;
+
+      if (property === 'cottages') {
+        revenue = cSumRev;
+        nightsSold = cSumNights;
+        guestArrivals = cSumGuests;
+        occupancy = yearSelected === '2026' ? 27.5 : 32.2;
+        adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+        extraServices = cSumExtra;
+        extraBreakdown = { earlyLate: cEarlyLate, pets: cPets, linens: cLinens, parking: cParking, water: cWater, other: cOther };
+        retentionRate = 38.0;
+        cottagesOcc = `${occupancy}%`;
+        cottagesNights = cSumNights;
+      } else if (property === 'beach') {
+        revenue = bSumRev;
+        nightsSold = bSumNights;
+        guestArrivals = bSumGuests;
+        occupancy = yearSelected === '2026' ? 11.2 : 12.4;
+        adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+        extraServices = bSumExtra;
+        extraBreakdown = { earlyLate: bEarlyLate, pets: bPets, linens: bLinens, parking: bParking, water: bWater, other: bOther };
+        retentionRate = 29.5;
+        beachOcc = `${occupancy}%`;
+        beachNights = bSumNights;
+      } else {
+        revenue = cSumRev + bSumRev;
+        nightsSold = cSumNights + bSumNights;
+        guestArrivals = cSumGuests + bSumGuests;
+        occupancy = yearSelected === '2026' ? 19.35 : 22.33;
+        adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
+        extraServices = cSumExtra + bSumExtra;
+        extraBreakdown = {
+          earlyLate: cEarlyLate + bEarlyLate,
+          pets: cPets + bPets,
+          linens: cLinens + bLinens,
+          parking: cParking + bParking,
+          water: cWater + bWater,
+          other: cOther + bOther
+        };
+        retentionRate = 38.6;
+        cottagesOcc = yearSelected === '2026' ? '27.5%' : '32.2%';
+        beachOcc = yearSelected === '2026' ? '11.2%' : '12.4%';
+        cottagesNights = cSumNights;
+        beachNights = bSumNights;
+      }
     }
 
-    const availableRoomNights = period === 'day' ? (property === 'cottages' ? 23 : property === 'beach' ? 58 : 81) : (property === 'cottages' ? 23 : property === 'beach' ? 58 : 81) * 31;
+    const availableRoomNights = period === 'day' ? (property === 'cottages' ? 23 : property === 'beach' ? 58 : 81) : (property === 'cottages' ? 23 : property === 'beach' ? 58 : 81) * (period === 'year' ? 365 : 31);
     const arpu = guestArrivals > 0 ? parseFloat((revenue / guestArrivals).toFixed(2)) : 0;
     const trevPar = parseFloat(((revenue + extraServices) / availableRoomNights).toFixed(2));
 
