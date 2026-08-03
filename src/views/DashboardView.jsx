@@ -10,7 +10,7 @@ export const AVAILABLE_YEARS = [
   { id: 'all-time', label: 'Весь период (13 месяцев)' }
 ];
 
-// Функция полного математического расчета с доп. доходами, ARPU, TrevPAR и Retention Rate
+// Функция полного математического расчета с ДИНАМИЧЕСКИМИ ДОП. УСЛУГАМИ для любого выбранного месяца
 const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) => {
   const monthsList = Object.keys(DB.cottages.monthly);
 
@@ -33,6 +33,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
   let prevAdrYear = 0;
 
   let extraServices = 0;
+  let extraBreakdown = { parking: 0, hotTub: 0, pets: 0, earlyLate: 0, other: 0 };
   let retentionRate = 0;
 
   let cottagesRev = 0;
@@ -61,6 +62,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     prevAdrYear = 18000.00;
 
     extraServices = propertyId === 'cottages' ? 35000.00 : propertyId === 'beach' ? 25000.00 : 60000.00;
+    extraBreakdown = { parking: 25000, hotTub: 18000, pets: 8000, earlyLate: 5000, other: 4000 };
     retentionRate = 38.5;
 
     cottagesRev = 453808.00;
@@ -106,6 +108,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevAdrYear = yoyCottages.adr;
 
       extraServices = currentCottages.extraServices || 0;
+      extraBreakdown = currentCottages.extraBreakdown || { parking: 0, hotTub: 0, pets: 0, earlyLate: 0, other: 0 };
       retentionRate = currentCottages.retention || 35.0;
 
       cottagesRev = currentCottages.revenue;
@@ -131,6 +134,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevAdrYear = yoyBeach.adr;
 
       extraServices = currentBeach.extraServices || 0;
+      extraBreakdown = currentBeach.extraBreakdown || { parking: 0, hotTub: 0, pets: 0, earlyLate: 0, other: 0 };
       retentionRate = currentBeach.retention || 28.0;
 
       beachRev = currentBeach.revenue;
@@ -156,6 +160,17 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       prevAdrYear = parseFloat((prevRevenueYear / prevNightsYear).toFixed(2));
 
       extraServices = (currentCottages.extraServices || 0) + (currentBeach.extraServices || 0);
+
+      const cEb = currentCottages.extraBreakdown || {};
+      const bEb = currentBeach.extraBreakdown || {};
+      extraBreakdown = {
+        parking: (cEb.parking || 0) + (bEb.parking || 0),
+        hotTub: (cEb.hotTub || 0) + (bEb.hotTub || 0),
+        pets: (cEb.pets || 0) + (bEb.pets || 0),
+        earlyLate: (cEb.earlyLate || 0) + (bEb.earlyLate || 0),
+        other: (cEb.other || 0) + (bEb.other || 0)
+      };
+
       retentionRate = parseFloat(((currentCottages.retention * currentCottages.guests + currentBeach.retention * currentBeach.guests) / guestArrivals).toFixed(1));
 
       cottagesRev = currentCottages.revenue;
@@ -202,18 +217,35 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     let cSumRev = 0, cSumNights = 0, cSumGuests = 0, cSumExtra = 0;
     let bSumRev = 0, bSumNights = 0, bSumGuests = 0, bSumExtra = 0;
 
+    let cParking = 0, cHotTub = 0, cPets = 0, cEarlyLate = 0, cOther = 0;
+    let bParking = 0, bHotTub = 0, bPets = 0, bEarlyLate = 0, bOther = 0;
+
     yearMonths.forEach(m => {
       if (DB.cottages.monthly[m]) {
         cSumRev += DB.cottages.monthly[m].revenue;
         cSumNights += DB.cottages.monthly[m].soldNights;
         cSumGuests += DB.cottages.monthly[m].guests;
         cSumExtra += (DB.cottages.monthly[m].extraServices || 0);
+
+        const eb = DB.cottages.monthly[m].extraBreakdown || {};
+        cParking += (eb.parking || 0);
+        cHotTub += (eb.hotTub || 0);
+        cPets += (eb.pets || 0);
+        cEarlyLate += (eb.earlyLate || 0);
+        cOther += (eb.other || 0);
       }
       if (DB.beach.monthly[m]) {
         bSumRev += DB.beach.monthly[m].revenue;
         bSumNights += DB.beach.monthly[m].soldNights;
         bSumGuests += DB.beach.monthly[m].guests;
         bSumExtra += (DB.beach.monthly[m].extraServices || 0);
+
+        const eb = DB.beach.monthly[m].extraBreakdown || {};
+        bParking += (eb.parking || 0);
+        bHotTub += (eb.hotTub || 0);
+        bPets += (eb.pets || 0);
+        bEarlyLate += (eb.earlyLate || 0);
+        bOther += (eb.other || 0);
       }
     });
 
@@ -224,6 +256,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       occupancy = selectedYear === '2026' ? 27.5 : 32.2;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
       extraServices = cSumExtra;
+      extraBreakdown = { parking: cParking, hotTub: cHotTub, pets: cPets, earlyLate: cEarlyLate, other: cOther };
       retentionRate = 38.0;
       cottagesRev = cSumRev;
       cottagesOcc = `${occupancy}%`;
@@ -235,6 +268,7 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       occupancy = selectedYear === '2026' ? 11.2 : 12.4;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
       extraServices = bSumExtra;
+      extraBreakdown = { parking: bParking, hotTub: bHotTub, pets: bPets, earlyLate: bEarlyLate, other: bOther };
       retentionRate = 29.5;
       beachRev = bSumRev;
       beachOcc = `${occupancy}%`;
@@ -246,6 +280,13 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       occupancy = selectedYear === '2026' ? 19.35 : 22.33;
       adr = parseFloat((revenue / (nightsSold || 1)).toFixed(2));
       extraServices = cSumExtra + bSumExtra;
+      extraBreakdown = {
+        parking: cParking + bParking,
+        hotTub: cHotTub + bHotTub,
+        pets: cPets + bPets,
+        earlyLate: cEarlyLate + bEarlyLate,
+        other: cOther + bOther
+      };
       retentionRate = 38.6;
       cottagesRev = cSumRev;
       beachRev = bSumRev;
@@ -256,10 +297,15 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
     }
   }
 
-  // Расчет ARPU и TrevPAR
+  // Честная математическая формула TrevPAR для каждого выбранного объекта:
+  let availableRoomNights = 81 * 31;
+  if (propertyId === 'cottages') availableRoomNights = 23 * 31;
+  if (propertyId === 'beach') availableRoomNights = 58 * 31;
+
+  if (period === 'year') availableRoomNights = (propertyId === 'cottages' ? 23 : propertyId === 'beach' ? 58 : 81) * 365;
+
   const arpu = guestArrivals > 0 ? parseFloat((revenue / guestArrivals).toFixed(2)) : 0;
-  const totalAvailableRooms = period === 'month' ? (81 * 31) : period === 'year' ? (81 * 365) : 81;
-  const trevPar = parseFloat(((revenue + extraServices) / totalAvailableRooms).toFixed(2));
+  const trevPar = parseFloat(((revenue + extraServices) / availableRoomNights).toFixed(2));
   const avgCheck = nightsSold > 0 ? parseFloat((revenue / nightsSold).toFixed(2)) : 0;
 
   // ДИНАМИКА MOM И YOY
@@ -327,7 +373,8 @@ const getMetricsForSelected = (selectedDate, selectedYear, propertyId, period) =
       },
       extraServices: {
         value: extraServices,
-        formatted: `${extraServices.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`
+        formatted: `${extraServices.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`,
+        breakdown: extraBreakdown
       },
       arpu: {
         value: arpu,
@@ -389,6 +436,7 @@ export const DashboardView = () => {
 
   const safeMetrics = data?.metrics || {};
   const safeBreakdown = data?.breakdown || {};
+  const safeExtraBreakdown = safeMetrics.extraServices?.breakdown || {};
 
   return (
     <div className="space-y-6 pb-28">
@@ -638,10 +686,10 @@ export const DashboardView = () => {
 
       </div>
 
-      {/* НОВАЯ СЕКЦИЯ: ДОП. ДОХОДЫ ПО МЕСЯЦАМ, ARPU, TREVPAR, СРЕДНИЙ ЧЕК И РЕТЕНШН ГОСТЕЙ */}
+      {/* НОВАЯ СЕКЦИЯ: ДИНАМИЧЕСКИЕ ДОП. ДОХОДЫ ПО МЕСЯЦАМ, ARPU, TREVPAR, СРЕДНИЙ ЧЕК И РЕТЕНШН ГОСТЕЙ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         
-        {/* Метрика 1: Доп. доходы по месяца с интерактивной детализацией */}
+        {/* Метрика 1: Доп. доходы по выбранному месяцу С ДИНАМИЧЕСКОЙ ДЕТАЛИЗАЦИЕЙ */}
         <div className="glass-card rounded-2xl p-4 flex flex-col justify-between relative border border-[#c3f400]/30 shadow-[0_0_15px_rgba(195,244,0,0.08)] col-span-1 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-[#c3f400]/15 pb-2">
             <div className="flex items-center gap-1.5">
@@ -667,25 +715,31 @@ export const DashboardView = () => {
             </span>
           </div>
 
-          {/* Раскрываемый блок детализации доп. услуг */}
+          {/* Раскрываемый динамический блок детализации доп. услуг ДЛЯ ВЫБРАННОГО МЕСЯЦА */}
           {showExtraDetails ? (
             <div className="mt-3 pt-3 border-t border-[#c3f400]/20 space-y-1.5 font-['Manrope'] text-[12px] bg-[#141313]/60 p-2.5 rounded-xl">
               <div className="flex justify-between items-center text-white">
                 <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#c3f400]">directions_car</span> 🚗 Парковка:</span>
-                <span className="font-extrabold text-[#c3f400]">245 000 ₽</span>
+                <span className="font-extrabold text-[#c3f400]">{(safeExtraBreakdown.parking || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
               <div className="flex justify-between items-center text-white">
                 <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#febf1a]">hot_tub</span> ♨️ Сибирская Купель & Баня:</span>
-                <span className="font-extrabold text-[#febf1a]">112 000 ₽</span>
+                <span className="font-extrabold text-[#febf1a]">{(safeExtraBreakdown.hotTub || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
               <div className="flex justify-between items-center text-white">
                 <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-[#00f0ff]">pets</span> 🐶 Проживание с питомцами:</span>
-                <span className="font-extrabold text-[#00f0ff]">68 000 ₽</span>
+                <span className="font-extrabold text-[#00f0ff]">{(safeExtraBreakdown.pets || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
               <div className="flex justify-between items-center text-white">
                 <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px] text-purple-400]">schedule</span> ⏰ Ранний / Поздний выезд:</span>
-                <span className="font-extrabold text-purple-300">54 200 ₽</span>
+                <span className="font-extrabold text-purple-300">{(safeExtraBreakdown.earlyLate || 0).toLocaleString('ru-RU')} ₽</span>
               </div>
+              {(safeExtraBreakdown.other || 0) > 0 && (
+                <div className="flex justify-between items-center text-white pt-1 border-t border-[#c3f400]/10">
+                  <span className="flex items-center gap-1 text-[#a3a6a6]"><span className="material-symbols-outlined text-[13px]">tune</span> 🛠️ Другие сервисы:</span>
+                  <span className="font-extrabold text-white">{(safeExtraBreakdown.other || 0).toLocaleString('ru-RU')} ₽</span>
+                </div>
+              )}
             </div>
           ) : (
             <p className="font-['Manrope'] text-[11px] text-[#a3a6a6] mt-1">
