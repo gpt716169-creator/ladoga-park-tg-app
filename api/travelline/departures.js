@@ -50,19 +50,26 @@ export default async function handler(req, res) {
   try {
     const token = await getTLToken();
 
-    // 1. Проверяем PMS API v2 бронирования Коттеджей
-    const pmsRes = await fetch(`https://partner.tlintegration.com/api/pms/v2/properties/52159/reservations?status=Active`, {
+    // 1. Проверяем Read Reservation API с различными параметрами
+    const r1 = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?createdDateTimeFrom=2026-01-01T00:00:00Z`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    const d1 = await r1.json();
 
-    const status = pmsRes.status;
-    const text = await pmsRes.text();
+    const r2 = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?page=1&pageSize=100`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const d2 = await r2.json();
 
     return res.status(200).json({
       property: 'cottages',
       propertyId: '52159',
-      status,
-      responseSample: text.substring(0, 1500)
+      createdFromSample: d1,
+      paginationSample: {
+        total: d2.bookingSummaries?.length,
+        firstThree: d2.bookingSummaries?.slice(0, 3),
+        lastThree: d2.bookingSummaries?.slice(-3)
+      }
     });
 
   } catch (err) {
