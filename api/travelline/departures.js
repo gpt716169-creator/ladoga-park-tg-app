@@ -50,26 +50,80 @@ export default async function handler(req, res) {
   try {
     const token = await getTLToken();
 
-    // 1. Проверяем Read Reservation API с различными параметрами
-    const r1 = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?createdDateTimeFrom=2026-01-01T00:00:00Z`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const d1 = await r1.json();
+    const departuresByDay = {};
+    for (let d = 1; d <= 31; d++) {
+      const dStr = `${month}-${d < 10 ? '0' + d : d}`;
+      departuresByDay[dStr] = 0;
+    }
 
-    const r2 = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?page=1&pageSize=100`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const d2 = await r2.json();
+    const departuresList = [];
+    let continueToken = null;
+    let pagesToScan = 8;
+    let allSummaries = [];
+
+    for (let page = 0; page < pagesToScan; page++) {
+      let url = `https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`;
+      if (continueToken) {
+        url += `?continueToken=${encodeURIComponent(continueToken)}`;
+      }
+
+      const bRes = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const bData = await bRes.json();
+      const summaries = bData.bookingSummaries || [];
+      allSummaries.push(...summaries);
+
+      if (!bData.hasMoreData || !bData.continueToken) break;
+      continueToken = bData.continueToken;
+    }
+
+    // Запрашиваем детали по полученным броням
+    const batchSize = 15;
+    for (let i = 0; i < allSummaries.length; i += batchSize) {
+      const batch = allSummaries.slice(i, i + batchSize);
+      const promises = batch.map(b => 
+        fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(r => r.json()).catch(() => null)
+      );
+
+      const results = await Promise.all(promises);
+      for (const item of results) {
+        const booking = item?.booking;
+        if (!booking || booking.status === 'Cancelled') continue;
+
+        for (const rs of (booking.roomStays || [])) {
+          const dep = rs.stayDates?.departureDateTime || '';
+          if (dep.startsWith(month)) {
+            const dStr = dep.substring(0, 10);
+            if (departuresByDay[dStr] !== undefined) {
+              departuresByDay[dStr]++;
+            }
+            departuresList.push({
+              bookingNumber: booking.number,
+              guestName: `${booking.customer?.lastName || ''} ${booking.customer?.firstName || ''}`.trim() || 'Гость',
+              roomType: rs.roomType?.name || 'Коттедж',
+              arrivalDate: rs.stayDates?.arrivalDateTime?.substring(0, 10),
+              departureDate: dStr
+            });
+          }
+        }
+      }
+    }
+
+    let totalDepartures = 0;
+    Object.values(departuresByDay).forEach(v => totalDepartures += v);
 
     return res.status(200).json({
       property: 'cottages',
       propertyId: '52159',
-      createdFromSample: d1,
-      paginationSample: {
-        total: d2.bookingSummaries?.length,
-        firstThree: d2.bookingSummaries?.slice(0, 3),
-        lastThree: d2.bookingSummaries?.slice(-3)
-      }
+      month,
+      scannedSummariesCount: allSummaries.length,
+      totalDepartures,
+      departuresByDay,
+      departuresList
     });
 
   } catch (err) {
