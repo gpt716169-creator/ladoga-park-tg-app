@@ -57,32 +57,32 @@ export default async function handler(req, res) {
     }
 
     const departuresList = [];
-    let continueToken = null;
-    let pagesToScan = 8;
-    let allSummaries = [];
 
-    for (let page = 0; page < pagesToScan; page++) {
-      let url = `https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`;
-      if (continueToken) {
-        url += `?continueToken=${encodeURIComponent(continueToken)}`;
-      }
+    // Запрашиваем первую страницу броней
+    const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
 
-      const bRes = await fetch(url, {
+    const bData = await bRes.json();
+    let summaries = bData.bookingSummaries || [];
+
+    // Запрашиваем следующую страницу по continueToken если есть
+    if (bData.continueToken) {
+      const cRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?continueToken=${encodeURIComponent(bData.continueToken)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      const bData = await bRes.json();
-      const summaries = bData.bookingSummaries || [];
-      allSummaries.push(...summaries);
-
-      if (!bData.hasMoreData || !bData.continueToken) break;
-      continueToken = bData.continueToken;
+      const cData = await cRes.json();
+      if (cData.bookingSummaries) {
+        summaries = summaries.concat(cData.bookingSummaries);
+      }
     }
 
-    // Запрашиваем детали по полученным броням
+    // Обрабатываем последние 50 актуальных броней быстро
+    const recentSummaries = summaries.slice(-60);
     const batchSize = 15;
-    for (let i = 0; i < allSummaries.length; i += batchSize) {
-      const batch = allSummaries.slice(i, i + batchSize);
+
+    for (let i = 0; i < recentSummaries.length; i += batchSize) {
+      const batch = recentSummaries.slice(i, i + batchSize);
       const promises = batch.map(b => 
         fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -120,7 +120,7 @@ export default async function handler(req, res) {
       property: 'cottages',
       propertyId: '52159',
       month,
-      scannedSummariesCount: allSummaries.length,
+      scannedSummariesCount: recentSummaries.length,
       totalDepartures,
       departuresByDay,
       departuresList
