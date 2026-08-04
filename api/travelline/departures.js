@@ -3,25 +3,17 @@ const CREDENTIALS = {
     propertyId: process.env.TL_PROPERTY_COTTAGES || '52159',
     clientId: process.env.TL_CLIENT_ID_COTTAGES || 'api_connection_9d1aa_ca2fef1de5',
     clientSecret: process.env.TL_CLIENT_SECRET_COTTAGES || 'CHXoevsKt6nKJqQZs2bJxL7zlFMUydrx'
-  },
-  beach: {
-    propertyId: process.env.TL_PROPERTY_BEACH || '54511',
-    clientId: process.env.TL_CLIENT_ID_BEACH || 'api_connection_bca5a_50c3f923e5',
-    clientSecret: process.env.TL_CLIENT_SECRET_BEACH || 'r1gtgA2UGey3D9swHDL01edbEPUEBZz3'
   }
 };
 
-const tokenCache = {
-  cottages: { token: null, expiresAt: 0 },
-  beach: { token: null, expiresAt: 0 }
-};
+let tokenCache = { token: null, expiresAt: 0 };
 
-async function getTLToken(propertyKey) {
-  const creds = CREDENTIALS[propertyKey];
+async function getTLToken() {
+  const creds = CREDENTIALS.cottages;
   const now = Date.now();
 
-  if (tokenCache[propertyKey].token && tokenCache[propertyKey].expiresAt > now + 30000) {
-    return tokenCache[propertyKey].token;
+  if (tokenCache.token && tokenCache.expiresAt > now + 30000) {
+    return tokenCache.token;
   }
 
   const res = await fetch('https://partner.tlintegration.com/auth/token', {
@@ -36,11 +28,11 @@ async function getTLToken(propertyKey) {
 
   const data = await res.json();
   if (!data.access_token) {
-    throw new Error(`Auth failed for ${propertyKey}`);
+    throw new Error(`Auth failed: ${JSON.stringify(data)}`);
   }
 
-  tokenCache[propertyKey].token = data.access_token;
-  tokenCache[propertyKey].expiresAt = now + (data.expires_in * 1000);
+  tokenCache.token = data.access_token;
+  tokenCache.expiresAt = now + (data.expires_in * 1000);
   return data.access_token;
 }
 
@@ -53,69 +45,29 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const { month = '2026-08' } = req.query || {};
+
   try {
-    const cToken = await getTLToken('cottages');
-    const bToken = await getTLToken('beach');
+    const token = await getTLToken();
 
-    // 1. Получаем список последних бронирований Коттеджей (52159)
-    const cRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`, {
-      headers: { 'Authorization': `Bearer ${cToken}` }
+    // 1. Проверяем Read Reservation API с arrivalDateTimeFrom и modifiedDateTimeFrom
+    const arrRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?arrivalDateTimeFrom=${month}-01T00:00:00Z&arrivalDateTimeTo=${month}-31T23:59:59Z`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-    const cData = await cRes.json();
-    const cSummaries = cData.bookingSummaries || [];
+    const arrData = await arrRes.json();
 
-    // 2. Получаем список последних бронирований Пляжа (54511)
-    const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/54511/bookings`, {
-      headers: { 'Authorization': `Bearer ${bToken}` }
+    const modRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?modifiedDateTimeFrom=2026-01-01T00:00:00Z`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-    const bData = await bRes.json();
-    const bSummaries = bData.bookingSummaries || [];
-
-    // Проверяем детали по 15 случайным свежим броням Коттеджей
-    const cSampleDetails = [];
-    for (const b of cSummaries.slice(-15)) {
-      const dRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
-        headers: { 'Authorization': `Bearer ${cToken}` }
-      });
-      if (dRes.ok) {
-        const d = await dRes.json();
-        if (d.booking) {
-          const roomStays = d.booking.roomStays || [];
-          cSampleDetails.push({
-            number: b.number,
-            status: d.booking.status,
-            customer: `${d.booking.customer?.lastName || ''} ${d.booking.customer?.firstName || ''}`,
-            stayDates: roomStays.map(r => r.stayDates)
-          });
-        }
-      }
-    }
-
-    // Проверяем детали по 15 случайным свежим броням Пляжа
-    const bSampleDetails = [];
-    for (const b of bSummaries.slice(-15)) {
-      const dRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/54511/bookings/${b.number}`, {
-        headers: { 'Authorization': `Bearer ${bToken}` }
-      });
-      if (dRes.ok) {
-        const d = await dRes.json();
-        if (d.booking) {
-          const roomStays = d.booking.roomStays || [];
-          bSampleDetails.push({
-            number: b.number,
-            status: d.booking.status,
-            customer: `${d.booking.customer?.lastName || ''} ${d.booking.customer?.firstName || ''}`,
-            stayDates: roomStays.map(r => r.stayDates)
-          });
-        }
-      }
-    }
+    const modData = await modRes.json();
 
     return res.status(200).json({
-      cottagesCount: cSummaries.length,
-      beachCount: bSummaries.length,
-      cottagesSample: cSampleDetails,
-      beachSample: bSampleDetails
+      property: 'cottages',
+      propertyId: '52159',
+      arrivalFilterCount: arrData.bookingSummaries?.length || 0,
+      arrivalSample: arrData.bookingSummaries?.slice(0, 3),
+      modifiedFilterCount: modData.bookingSummaries?.length || 0,
+      modifiedSample: modData.bookingSummaries?.slice(0, 3)
     });
 
   } catch (err) {
