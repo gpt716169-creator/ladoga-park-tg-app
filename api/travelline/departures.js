@@ -50,67 +50,24 @@ export default async function handler(req, res) {
   try {
     const token = await getTLToken();
 
-    const departuresByDay = {};
-    for (let d = 1; d <= 31; d++) {
-      const dStr = `${month}-${d < 10 ? '0' + d : d}`;
-      departuresByDay[dStr] = 0;
-    }
-
-    const departuresList = [];
-
-    const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`, {
+    // Запрос PMS Analytics по дням для июля и августа
+    const julyRes = await fetch(`https://partner.tlintegration.com/api/pms-analytics/v1/properties/52159/daily-occupancy?startStayDate=2026-07-01&endStayDate=2026-07-31`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    const julyData = await julyRes.json();
 
-    const bData = await bRes.json();
-    let summaries = Array.isArray(bData.bookingSummaries) ? bData.bookingSummaries : [];
-
-    const recentSummaries = summaries.slice(-50);
-    const batchSize = 10;
-
-    for (let i = 0; i < recentSummaries.length; i += batchSize) {
-      const batch = recentSummaries.slice(i, i + batchSize);
-      const promises = batch.map(b => 
-        fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).then(r => r.ok ? r.json() : null).catch(() => null)
-      );
-
-      const results = await Promise.all(promises);
-      for (const item of results) {
-        const booking = item?.booking;
-        if (!booking || booking.status === 'Cancelled') continue;
-
-        for (const rs of (booking.roomStays || [])) {
-          const dep = rs.stayDates?.departureDateTime || '';
-          if (dep.startsWith(month)) {
-            const dStr = dep.substring(0, 10);
-            if (departuresByDay[dStr] !== undefined) {
-              departuresByDay[dStr]++;
-            }
-            departuresList.push({
-              bookingNumber: booking.number,
-              guestName: `${booking.customer?.lastName || ''} ${booking.customer?.firstName || ''}`.trim() || 'Гость',
-              roomType: rs.roomType?.name || 'Коттедж',
-              arrivalDate: rs.stayDates?.arrivalDateTime?.substring(0, 10),
-              departureDate: dStr
-            });
-          }
-        }
-      }
-    }
-
-    let totalDepartures = 0;
-    Object.values(departuresByDay).forEach(v => totalDepartures += v);
+    const augRes = await fetch(`https://partner.tlintegration.com/api/pms-analytics/v1/properties/52159/daily-occupancy?startStayDate=2026-08-01&endStayDate=2026-08-31`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const augData = await augRes.json();
 
     return res.status(200).json({
       property: 'cottages',
       propertyId: '52159',
-      month,
-      scannedSummariesCount: recentSummaries.length,
-      totalDepartures,
-      departuresByDay,
-      departuresList
+      julySample: julyData.dailyOccupancies?.slice(0, 5),
+      julyTotalDays: julyData.dailyOccupancies?.length,
+      augustSample: augData.dailyOccupancies?.slice(0, 5),
+      augustTotalDays: augData.dailyOccupancies?.length
     });
 
   } catch (err) {
