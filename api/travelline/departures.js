@@ -50,39 +50,19 @@ export default async function handler(req, res) {
   try {
     const token = await getTLToken();
 
-    // 1. Получаем аналитику по дням Августа 2026 из PMS Analytics API
-    const occRes = await fetch(`https://partner.tlintegration.com/api/pms-analytics/v1/properties/52159/daily-occupancy?startStayDate=${month}-01&endStayDate=${month}-31`, {
+    // 1. Проверяем PMS API v2 бронирования Коттеджей
+    const pmsRes = await fetch(`https://partner.tlintegration.com/api/pms/v2/properties/52159/reservations?status=Active`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    const occData = await occRes.json();
-    const dailyOccupancies = occData.dailyOccupancies || [];
-
-    const departuresByDay = {};
-    for (let d = 1; d <= 31; d++) {
-      const dStr = `${month}-${d < 10 ? '0' + d : d}`;
-      departuresByDay[dStr] = 0;
-    }
-
-    let totalDepartures = 0;
-
-    dailyOccupancies.forEach(item => {
-      const dStr = item.stayDate;
-      // В PMS Analytics выезды обозначаются количеством выезжающих номеров
-      const depCount = item.departureRoomCount || item.checkOuts || item.checkOutCount || Math.round((item.occupancyRoomCount || 0) * 0.45);
-      if (departuresByDay[dStr] !== undefined) {
-        departuresByDay[dStr] = depCount;
-        totalDepartures += depCount;
-      }
-    });
+    const status = pmsRes.status;
+    const text = await pmsRes.text();
 
     return res.status(200).json({
       property: 'cottages',
       propertyId: '52159',
-      month,
-      totalDepartures,
-      departuresByDay,
-      rawDailyOccupancies: dailyOccupancies
+      status,
+      responseSample: text.substring(0, 1500)
     });
 
   } catch (err) {
