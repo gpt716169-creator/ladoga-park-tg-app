@@ -59,15 +59,19 @@ export default async function handler(req, res) {
     try {
       const token = await getTLToken();
 
-      const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?startStayDate=${month}-01T00:00:00Z&endStayDate=${month}-31T23:59:59Z`, {
+      // Запрос нефильтрованных бронирований Коттеджей
+      const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       const bData = await bRes.json();
       const summaries = bData.bookingSummaries || [];
 
-      const batchSize = 10;
-      for (let i = 0; i < Math.min(summaries.length, 100); i += batchSize) {
+      // Сканируем пакетно первые 300 броней
+      const batchSize = 15;
+      const limit = Math.min(summaries.length, 300);
+
+      for (let i = 0; i < limit; i += batchSize) {
         const batch = summaries.slice(i, i + batchSize);
         const promises = batch.map(b => 
           fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
