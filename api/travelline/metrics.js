@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 const CREDENTIALS = {
   cottages: {
     propertyId: process.env.TL_PROPERTY_COTTAGES || '52159',
@@ -11,6 +8,31 @@ const CREDENTIALS = {
     propertyId: process.env.TL_PROPERTY_BEACH || '54511',
     clientId: process.env.TL_CLIENT_ID_BEACH || 'api_connection_bca5a_50c3f923e5',
     clientSecret: process.env.TL_CLIENT_SECRET_BEACH || 'r1gtgA2UGey3D9swHDL01edbEPUEBZz3'
+  }
+};
+
+const DB_DATA = {
+  cottages: {
+    monthly: {
+      '2026-07': { revenue: 8200000, soldNights: 432, guests: 540, occupancy: 96, adr: 18981.48, extraServices: 975000, retention: 42.5 },
+      '2026-06': { revenue: 4980000, soldNights: 310, guests: 410, occupancy: 82, adr: 16064.51, extraServices: 187340, retention: 38.0 },
+      '2026-05': { revenue: 3450000, soldNights: 220, guests: 290, occupancy: 65, adr: 15681.81, extraServices: 240000, retention: 36.0 },
+      '2026-04': { revenue: 580000, soldNights: 45, guests: 60, occupancy: 28, adr: 12888.88, extraServices: 45000, retention: 32.0 },
+      '2026-03': { revenue: 520000, soldNights: 40, guests: 55, occupancy: 25, adr: 13000.00, extraServices: 38000, retention: 31.0 },
+      '2026-02': { revenue: 430000, soldNights: 35, guests: 48, occupancy: 22, adr: 12285.71, extraServices: 30000, retention: 30.0 },
+      '2026-01': { revenue: 1070000, soldNights: 75, guests: 95, occupancy: 42, adr: 14266.66, extraServices: 85000, retention: 35.0 }
+    }
+  },
+  beach: {
+    monthly: {
+      '2026-07': { revenue: 4400000, soldNights: 495, guests: 680, occupancy: 28.8, adr: 8888.88, extraServices: 2000620, retention: 28.5 },
+      '2026-06': { revenue: 2140000, soldNights: 280, guests: 390, occupancy: 19.5, adr: 7642.85, extraServices: 850000, retention: 25.0 },
+      '2026-05': { revenue: 1490000, soldNights: 190, guests: 260, occupancy: 14.2, adr: 7842.10, extraServices: 420000, retention: 22.0 },
+      '2026-04': { revenue: 240000, soldNights: 30, guests: 40, occupancy: 4.8, adr: 8000.00, extraServices: 60000, retention: 18.0 },
+      '2026-03': { revenue: 210000, soldNights: 25, guests: 35, occupancy: 4.1, adr: 8400.00, extraServices: 50000, retention: 17.0 },
+      '2026-02': { revenue: 180000, soldNights: 22, guests: 30, occupancy: 3.6, adr: 8181.81, extraServices: 40000, retention: 15.0 },
+      '2026-01': { revenue: 500000, soldNights: 55, guests: 75, occupancy: 8.5, adr: 9090.90, extraServices: 120000, retention: 20.0 }
+    }
   }
 };
 
@@ -79,13 +101,7 @@ export default async function handler(req, res) {
   const { property = 'all', period = 'month', date = '2026-07' } = req.query || {};
 
   try {
-    let DB = { cottages: { monthly: {} }, beach: { monthly: {} } };
-    try {
-      const dbFile = path.join(process.cwd(), 'database.json');
-      if (fs.existsSync(dbFile)) {
-        DB = JSON.parse(fs.readFileSync(dbFile, 'utf8'));
-      }
-    } catch (e) {}
+    const DB = DB_DATA;
 
     let revenue = 0;
     let nightsSold = 0;

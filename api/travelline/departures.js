@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 const CREDENTIALS = {
   cottages: {
     propertyId: process.env.TL_PROPERTY_COTTAGES || '52159',
@@ -51,54 +48,58 @@ export default async function handler(req, res) {
   const { month = '2026-08' } = req.query || {};
 
   try {
-    const token = await getTLToken();
-
-    // Запрос броней Коттеджей
-    const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?startStayDate=${month}-01T00:00:00Z&endStayDate=${month}-31T23:59:59Z`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    const bData = await bRes.json();
-    const summaries = bData.bookingSummaries || [];
-
     const departuresByDay = {};
     for (let d = 1; d <= 31; d++) {
       const dStr = `${month}-${d < 10 ? '0' + d : d}`;
       departuresByDay[dStr] = 0;
     }
 
-    const departuresList = [];
-    const batchSize = 10;
-    for (let i = 0; i < summaries.length; i += batchSize) {
-      const batch = summaries.slice(i, i + batchSize);
-      const promises = batch.map(b => 
-        fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).then(r => r.json()).catch(() => null)
-      );
+    let departuresList = [];
 
-      const results = await Promise.all(promises);
-      for (const item of results) {
-        const booking = item?.booking;
-        if (!booking || booking.status === 'Cancelled') continue;
+    try {
+      const token = await getTLToken();
 
-        for (const rs of (booking.roomStays || [])) {
-          const dep = rs.stayDates?.departureDateTime || '';
-          if (dep.startsWith(month)) {
-            const dStr = dep.substring(0, 10);
-            if (departuresByDay[dStr] !== undefined) {
-              departuresByDay[dStr]++;
+      const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?startStayDate=${month}-01T00:00:00Z&endStayDate=${month}-31T23:59:59Z`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const bData = await bRes.json();
+      const summaries = bData.bookingSummaries || [];
+
+      const batchSize = 10;
+      for (let i = 0; i < Math.min(summaries.length, 100); i += batchSize) {
+        const batch = summaries.slice(i, i + batchSize);
+        const promises = batch.map(b => 
+          fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).then(r => r.json()).catch(() => null)
+        );
+
+        const results = await Promise.all(promises);
+        for (const item of results) {
+          const booking = item?.booking;
+          if (!booking || booking.status === 'Cancelled') continue;
+
+          for (const rs of (booking.roomStays || [])) {
+            const dep = rs.stayDates?.departureDateTime || '';
+            if (dep.startsWith(month)) {
+              const dStr = dep.substring(0, 10);
+              if (departuresByDay[dStr] !== undefined) {
+                departuresByDay[dStr]++;
+              }
+              departuresList.push({
+                bookingNumber: booking.number,
+                guestName: `${booking.customer?.lastName || ''} ${booking.customer?.firstName || ''}`.trim() || 'Гость',
+                roomType: rs.roomType?.name || 'Коттедж',
+                arrivalDate: rs.stayDates?.arrivalDateTime?.substring(0, 10),
+                departureDate: dStr
+              });
             }
-            departuresList.push({
-              bookingNumber: booking.number,
-              guestName: `${booking.customer?.lastName || ''} ${booking.customer?.firstName || ''}`.trim() || 'Гость',
-              roomType: rs.roomType?.name || 'Коттедж',
-              arrivalDate: rs.stayDates?.arrivalDateTime?.substring(0, 10),
-              departureDate: dStr
-            });
           }
         }
       }
+    } catch (e) {
+      console.error('Departures live fetch error:', e.message);
     }
 
     let totalDepartures = 0;
