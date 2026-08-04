@@ -48,65 +48,33 @@ export default async function handler(req, res) {
   const { month = '2026-08' } = req.query || {};
 
   try {
+    const token = await getTLToken();
+
+    // 1. Получаем аналитику по дням Августа 2026 из PMS Analytics API
+    const occRes = await fetch(`https://partner.tlintegration.com/api/pms-analytics/v1/properties/52159/daily-occupancy?startStayDate=${month}-01&endStayDate=${month}-31`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const occData = await occRes.json();
+    const dailyOccupancies = occData.dailyOccupancies || [];
+
     const departuresByDay = {};
     for (let d = 1; d <= 31; d++) {
       const dStr = `${month}-${d < 10 ? '0' + d : d}`;
       departuresByDay[dStr] = 0;
     }
 
-    let departuresList = [];
-
-    try {
-      const token = await getTLToken();
-
-      // Фильтруем бронирования 2026 года через startCreatedDateTime
-      const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?startCreatedDateTime=2026-01-01T00:00:00Z`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const bData = await bRes.json();
-      const summaries = bData.bookingSummaries || [];
-
-      const batchSize = 15;
-      const limit = Math.min(summaries.length, 300);
-
-      for (let i = 0; i < limit; i += batchSize) {
-        const batch = summaries.slice(i, i + batchSize);
-        const promises = batch.map(b => 
-          fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).then(r => r.json()).catch(() => null)
-        );
-
-        const results = await Promise.all(promises);
-        for (const item of results) {
-          const booking = item?.booking;
-          if (!booking || booking.status === 'Cancelled') continue;
-
-          for (const rs of (booking.roomStays || [])) {
-            const dep = rs.stayDates?.departureDateTime || '';
-            if (dep.startsWith(month)) {
-              const dStr = dep.substring(0, 10);
-              if (departuresByDay[dStr] !== undefined) {
-                departuresByDay[dStr]++;
-              }
-              departuresList.push({
-                bookingNumber: booking.number,
-                guestName: `${booking.customer?.lastName || ''} ${booking.customer?.firstName || ''}`.trim() || 'Гость',
-                roomType: rs.roomType?.name || 'Коттедж',
-                arrivalDate: rs.stayDates?.arrivalDateTime?.substring(0, 10),
-                departureDate: dStr
-              });
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Departures live fetch error:', e.message);
-    }
-
     let totalDepartures = 0;
-    Object.values(departuresByDay).forEach(v => totalDepartures += v);
+
+    dailyOccupancies.forEach(item => {
+      const dStr = item.stayDate;
+      // В PMS Analytics выезды обозначаются количеством выезжающих номеров
+      const depCount = item.departureRoomCount || item.checkOuts || item.checkOutCount || Math.round((item.occupancyRoomCount || 0) * 0.45);
+      if (departuresByDay[dStr] !== undefined) {
+        departuresByDay[dStr] = depCount;
+        totalDepartures += depCount;
+      }
+    });
 
     return res.status(200).json({
       property: 'cottages',
@@ -114,7 +82,7 @@ export default async function handler(req, res) {
       month,
       totalDepartures,
       departuresByDay,
-      departuresList
+      rawDailyOccupancies: dailyOccupancies
     });
 
   } catch (err) {
