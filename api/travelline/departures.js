@@ -58,35 +58,22 @@ export default async function handler(req, res) {
 
     const departuresList = [];
 
-    // Запрашиваем первую страницу броней
     const bRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const bData = await bRes.json();
-    let summaries = bData.bookingSummaries || [];
+    let summaries = Array.isArray(bData.bookingSummaries) ? bData.bookingSummaries : [];
 
-    // Запрашиваем следующую страницу по continueToken если есть
-    if (bData.continueToken) {
-      const cRes = await fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings?continueToken=${encodeURIComponent(bData.continueToken)}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const cData = await cRes.json();
-      if (cData.bookingSummaries) {
-        summaries = summaries.concat(cData.bookingSummaries);
-      }
-    }
-
-    // Обрабатываем последние 50 актуальных броней быстро
-    const recentSummaries = summaries.slice(-60);
-    const batchSize = 15;
+    const recentSummaries = summaries.slice(-50);
+    const batchSize = 10;
 
     for (let i = 0; i < recentSummaries.length; i += batchSize) {
       const batch = recentSummaries.slice(i, i + batchSize);
       const promises = batch.map(b => 
         fetch(`https://partner.tlintegration.com/api/read-reservation/v1/properties/52159/bookings/${b.number}`, {
           headers: { 'Authorization': `Bearer ${token}` }
-        }).then(r => r.json()).catch(() => null)
+        }).then(r => r.ok ? r.json() : null).catch(() => null)
       );
 
       const results = await Promise.all(promises);
@@ -127,6 +114,6 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 }
