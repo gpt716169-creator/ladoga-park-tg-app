@@ -45,12 +45,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { month = '2026-08' } = req.query || {};
-
   try {
     const token = await getTLToken();
 
-    // Запрос PMS Analytics по дням для июля и августа
     const julyRes = await fetch(`https://partner.tlintegration.com/api/pms-analytics/v1/properties/52159/daily-occupancy?startStayDate=2026-07-01&endStayDate=2026-07-31`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -64,13 +61,16 @@ export default async function handler(req, res) {
     return res.status(200).json({
       property: 'cottages',
       propertyId: '52159',
-      julySample: julyData.dailyOccupancies?.slice(0, 5),
-      julyTotalDays: julyData.dailyOccupancies?.length,
-      augustSample: augData.dailyOccupancies?.slice(0, 5),
-      augustTotalDays: augData.dailyOccupancies?.length
+      julySample: julyData.dailyOccupancies?.slice(0, 3),
+      augustSample: augData.dailyOccupancies?.slice(0, 3),
+      julyTotal: julyData.dailyOccupancies?.length || 0,
+      augustTotal: augData.dailyOccupancies?.length || 0
     });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(200).json({
+      error: err.message,
+      stack: err.stack
+    });
   }
 }
