@@ -1,4 +1,5 @@
-import DB from '../../database.json' assert { type: 'json' };
+import fs from 'fs';
+import path from 'path';
 
 const CREDENTIALS = {
   cottages: {
@@ -78,6 +79,14 @@ export default async function handler(req, res) {
   const { property = 'all', period = 'month', date = '2026-07' } = req.query || {};
 
   try {
+    let DB = { cottages: { monthly: {} }, beach: { monthly: {} } };
+    try {
+      const dbFile = path.join(process.cwd(), 'database.json');
+      if (fs.existsSync(dbFile)) {
+        DB = JSON.parse(fs.readFileSync(dbFile, 'utf8'));
+      }
+    } catch (e) {}
+
     let revenue = 0;
     let nightsSold = 0;
     let guestArrivals = 0;
@@ -108,7 +117,6 @@ export default async function handler(req, res) {
       const calcCottageDayRev = parseFloat((cM.revenue / daysInMonth).toFixed(2));
       const calcBeachDayRev = parseFloat((bM.revenue / daysInMonth).toFixed(2));
 
-      // Прямой расчет без неверных хардкодов
       if (liveBeach && (liveBeach.revenue > 0 || liveBeach.roomRevenue > 0)) {
         beachRev = liveBeach.revenue || liveBeach.roomRevenue;
         beachNights = liveBeach.occupancyRoomCount || 2;

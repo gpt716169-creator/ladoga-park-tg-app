@@ -1,4 +1,5 @@
-import DB from '../../database.json' assert { type: 'json' };
+import fs from 'fs';
+import path from 'path';
 
 const CREDENTIALS = {
   cottages: {
@@ -67,8 +68,6 @@ export default async function handler(req, res) {
     }
 
     const departuresList = [];
-
-    // Запрашиваем детали по найденным броням
     const batchSize = 10;
     for (let i = 0; i < summaries.length; i += batchSize) {
       const batch = summaries.slice(i, i + batchSize);
